@@ -4,11 +4,15 @@ import { calculateFinalTax } from "./final";
 import { calculateMonthlyTax } from "./monthly";
 import { calculatePartYearTax } from "./part-year";
 import { calculatePaymentImpact } from "./payment-impact";
+import {
+  calculatePayrollAllocation,
+} from "./payroll-allocation";
 
 import type {
   PaymentImpactResult,
   TaxCalculationInput,
   TaxSimulationResult,
+  GrossUpPayment,
 } from "./types";
 
 
@@ -18,6 +22,21 @@ export interface TaxSimulationOptions {
    * dampak berdasarkan urutan pembayaran.
    */
   includePaymentImpact?: boolean;
+
+  /**
+   * Jika true, engine menghitung mekanisme
+   * payroll Gross-Up / Re-Gross-Up.
+   *
+   * Ini merupakan simulasi mekanisme payroll,
+   * bukan pengganti perhitungan PPh 21 resmi.
+   */
+  includePayrollAllocation?: boolean;
+
+  /**
+   * Daftar payment payroll yang akan dianalisis
+   * oleh Gross-Up / Re-Gross-Up engine.
+   */
+  payrollPayments?: GrossUpPayment[];
 
   /**
    * Total PPh 21 yang sudah dipotong pada
@@ -33,6 +52,8 @@ export function simulateTax(
 ): TaxSimulationResult {
   const {
     includePaymentImpact = false,
+    includePayrollAllocation = false,
+    payrollPayments = [],
     previousTaxWithheld = 0,
   } = options;
 
@@ -48,6 +69,13 @@ export function simulateTax(
    * =====================================================
    * MASA PAJAK FINAL
    * =====================================================
+   *
+   * Untuk tahap ini payroll allocation belum
+   * diaktifkan pada masa final.
+   *
+   * Perhitungan final tetap menggunakan
+   * Final Tax Engine / Part-Year Tax Engine
+   * seperti sebelumnya.
    */
   if (input.profile.isFinalMonth) {
     const monthsWorked =
@@ -150,10 +178,22 @@ export function simulateTax(
    * MASA PAJAK BIASA
    * =====================================================
    */
+
+  /**
+   * 1. Hitung PPh 21 RESMI.
+   *
+   * Ini tetap menggunakan official tax engine.
+   */
   const monthly =
     calculateMonthlyTax(input);
 
 
+  /**
+   * 2. Payment Impact
+   *
+   * Ini adalah simulasi edukasi berdasarkan
+   * urutan payment.
+   */
   let paymentImpact:
     | PaymentImpactResult[]
     | undefined;
@@ -184,9 +224,79 @@ export function simulateTax(
   }
 
 
+  /**
+   * 3. Payroll Allocation
+   *
+   * Ini merupakan layer terpisah dari
+   * official PPh 21 calculation.
+   */
+  let payrollAllocation:
+    | TaxSimulationResult["payrollAllocation"]
+    | undefined;
+
+
+  if (includePayrollAllocation) {
+    if (
+      payrollPayments.length === 0
+    ) {
+      throw new Error(
+        "Payroll allocation membutuhkan minimal satu payment.",
+      );
+    }
+
+    const config =
+      getTaxConfig(
+        input.profile.taxYear,
+      );
+
+    const terCategory =
+      config.TER_CATEGORY[
+        input.profile.status
+      ];
+
+    payrollAllocation =
+      calculatePayrollAllocation({
+        taxYear:
+          input.profile.taxYear,
+
+        category:
+          terCategory,
+
+        /**
+         * PPh resmi berasal dari
+         * Monthly Tax Engine.
+         *
+         * Jangan menghitung ulang
+         * officialTax dari gross-up engine.
+         */
+        officialTax:
+          monthly.tax,
+
+        payments:
+          payrollPayments,
+      });
+  }
+
+
+  /**
+   * =====================================================
+   * RESULT
+   * =====================================================
+   *
+   * official PPh tetap berada pada:
+   *
+   * monthly.tax
+   *
+   * sedangkan:
+   *
+   * payrollAllocation.grossUpAdjustment
+   *
+   * adalah informasi mekanisme payroll.
+   */
   return {
     grossIncome,
     monthly,
     paymentImpact,
+    payrollAllocation,
   };
 }

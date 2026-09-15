@@ -1,3 +1,4 @@
+import type { PayrollAllocationResult } from "./payroll-allocation";
 export type TaxpayerStatus =
   | "TK/0"
   | "TK/1"
@@ -181,7 +182,9 @@ export interface PaymentImpactInput {
 /**
  * Hasil keseluruhan simulasi masa pajak.
  */
+
 export interface TaxSimulationResult {
+  
   /**
    * Total penghasilan pada masa pajak
    * yang sedang disimulasikan.
@@ -207,6 +210,7 @@ export interface TaxSimulationResult {
    * Simulasi edukasi berdasarkan urutan pembayaran.
    */
   paymentImpact?: PaymentImpactResult[];
+  payrollAllocation?: PayrollAllocationResult;
 }
 
 
@@ -333,4 +337,17 @@ export interface PartYearTaxResult {
   overpayment: number;
 
   tax: number;
+}
+export type GrossUpPaymentTreatment =
+  | "GROSS"
+  | "GROSS_UP";
+
+export interface GrossUpPayment {
+  id: string;
+  name: string;
+  amount: number;
+  treatment: GrossUpPaymentTreatment;
+
+  grossUpBase?: number;
+  actualTaxAllowance?: number;
 }
