@@ -15,70 +15,92 @@ export interface GrossUpAllowanceInput {
 }
 
 /**
- * Input untuk menghitung re-gross-up setelah kondisi
- * bruto/TER masa pajak berubah.
+ * Input untuk menghitung re-gross-up.
+ *
+ * grossUpBases:
+ *   Basis penghasilan sebelum tunjangan PPh
+ *   untuk seluruh payment GROSS_UP.
+ *
+ * actualTaxAllowances:
+ *   Tunjangan PPh yang benar-benar terbentuk
+ *   ketika masing-masing payment GROSS_UP
+ *   pertama kali diproses.
+ *
+ * actualTaxAllowances bukan input user.
+ * Nilai ini dihasilkan oleh engine.
  */
 export interface GrossUpRecalculationInput {
   taxYear: number;
   category: TERCategory;
 
   /**
-   * Total bruto aktual yang sudah terbentuk,
-   * termasuk tunjangan PPh aktual dan komponen
-   * lain yang menjadi objek pajak.
+   * Total bruto aktual kumulatif sampai posisi
+   * payment yang sedang dihitung.
+   *
+   * Nilai ini SUDAH termasuk allowance GROSS_UP
+   * yang benar-benar terbentuk.
    */
   actualGross: number;
 
   /**
-   * Basis penghasilan yang di-gross-up.
-   * Tidak termasuk tax allowance aktual.
+   * Base dari seluruh payment GROSS_UP
+   * yang sudah muncul sampai posisi ini.
    */
-  grossUpBase: number;
+  grossUpBases: number[];
 
   /**
-   * Tunjangan PPh yang sudah diberikan sebelumnya.
+   * Allowance aktual dari seluruh payment
+   * GROSS_UP tersebut.
+   *
+   * Array harus berpasangan dengan grossUpBases.
    */
-  actualTaxAllowance: number;
+  actualTaxAllowances: number[];
 }
 
 export interface GrossUpRecalculationResult {
   actualGross: number;
+
+  /**
+   * Total basis penghasilan sebelum
+   * tunjangan PPh.
+   */
   grossUpBase: number;
+
+  /**
+   * Total allowance yang benar-benar
+   * sudah terbentuk sebelumnya.
+   */
   actualTaxAllowance: number;
 
   /**
-   * TER berdasarkan bruto aktual sebelum re-gross-up.
+   * TER berdasarkan bruto aktual.
    */
   initialTerRate: number;
 
   /**
-   * TER yang konsisten setelah adjustment gross-up.
+   * TER final setelah re-gross-up.
    */
   finalTerRate: number;
 
   /**
-   * Tunjangan PPh yang seharusnya tersedia
-   * berdasarkan TER final.
+   * Total allowance yang seharusnya
+   * tersedia berdasarkan TER final.
    */
   oriTaxAllowance: number;
 
   /**
-   * Selisih antara kebutuhan tunjangan pajak
-   * dan tunjangan yang sudah diberikan.
+   * Tambahan allowance yang diperlukan
+   * dibandingkan allowance aktual.
    */
   grossUpAdjustment: number;
 
   /**
-   * Bruto setelah adjustment internal payroll.
+   * Bruto setelah adjustment.
    */
   brutoOri: number;
 
   /**
    * PPh berdasarkan brutoOri dan TER final.
-   *
-   * Ini adalah hasil mekanisme internal payroll,
-   * bukan rumus terpisah untuk setiap payment
-   * secara hukum.
    */
   totalTax: number;
 }
@@ -90,8 +112,6 @@ export interface GrossUpRecalculationResult {
  * Formula:
  *
  * A = G × t / (1 - t)
- *
- * Hasil dibulatkan ke rupiah.
  */
 export function calculateGrossUpAllowance(
   input: GrossUpAllowanceInput,
@@ -101,7 +121,9 @@ export function calculateGrossUpAllowance(
   );
 
   if (
-    !Number.isFinite(input.terRate) ||
+    !Number.isFinite(
+      input.terRate,
+    ) ||
     input.terRate < 0 ||
     input.terRate >= 1
   ) {
@@ -110,7 +132,9 @@ export function calculateGrossUpAllowance(
     );
   }
 
-  if (input.terRate === 0) {
+  if (
+    input.terRate === 0
+  ) {
     return 0;
   }
 
@@ -124,48 +148,116 @@ export function calculateGrossUpAllowance(
 }
 
 /**
- * Menghitung kebutuhan re-gross-up secara
+ * Menghitung kebutuhan Re-Gross-Up secara
  * bracket-aware.
  *
- * Prinsip:
+ * Mekanisme:
  *
- * 1. Cari TER berdasarkan actualGross.
- * 2. Hitung ulang tax allowance berdasarkan TER tersebut.
- * 3. Tambahkan selisih allowance ke actualGross.
- * 4. Cari TER baru berdasarkan brutoOri.
- * 5. Jika TER berubah, ulangi.
- * 6. Berhenti ketika TER sudah konsisten.
+ * 1. Tentukan TER dari actualGross.
+ * 2. Hitung ulang seluruh allowance GROSS_UP
+ *    berdasarkan TER kandidat.
+ * 3. Bandingkan dengan allowance aktual.
+ * 4. Tambahkan selisih allowance ke actualGross.
+ * 5. Cari TER kembali.
+ * 6. Jika TER berubah, ulangi.
+ * 7. Berhenti ketika TER konsisten.
  *
- * Ini diperlukan karena adjustment gross-up sendiri
- * dapat mendorong bruto ke bracket TER berikutnya.
+ * Dengan demikian:
+ *
+ * allowance aktual
+ *       ↓
+ * allowance yang seharusnya
+ *       ↓
+ * adjustment
+ *
+ * dapat dihitung tanpa meminta user
+ * memasukkan allowance secara manual.
  */
 export function calculateGrossUpRecalculation(
   input: GrossUpRecalculationInput,
 ): GrossUpRecalculationResult {
-  validateRecalculationInput(input);
-
-  const config = getTaxConfig(
-    input.taxYear,
+  validateRecalculationInput(
+    input,
   );
 
-  const initialTer = getTER(
-    input.category,
-    input.actualGross,
-    {
-      TER_A: config.TER_A,
-      TER_B: config.TER_B,
-      TER_C: config.TER_C,
-    },
-  );
+  const config =
+    getTaxConfig(
+      input.taxYear,
+    );
+
+  const terBrackets = {
+    TER_A: config.TER_A,
+    TER_B: config.TER_B,
+    TER_C: config.TER_C,
+  };
+
+  const initialTer =
+    getTER(
+      input.category,
+      input.actualGross,
+      terBrackets,
+    );
+
+  const totalGrossUpBase =
+    input.grossUpBases.reduce(
+      (
+        total,
+        value,
+      ) =>
+        total + value,
+      0,
+    );
+
+  const totalActualTaxAllowance =
+    input.actualTaxAllowances.reduce(
+      (
+        total,
+        value,
+      ) =>
+        total + value,
+      0,
+    );
+
+  /**
+   * Tidak ada Gross-Up.
+   */
+  if (
+    input.grossUpBases.length === 0
+  ) {
+    const totalTax =
+      Math.round(
+        input.actualGross *
+          initialTer.rate,
+      );
+
+    return {
+      actualGross:
+        input.actualGross,
+
+      grossUpBase: 0,
+
+      actualTaxAllowance: 0,
+
+      initialTerRate:
+        initialTer.rate,
+
+      finalTerRate:
+        initialTer.rate,
+
+      oriTaxAllowance: 0,
+
+      grossUpAdjustment: 0,
+
+      brutoOri:
+        input.actualGross,
+
+      totalTax,
+    };
+  }
 
   let candidateRate =
     initialTer.rate;
 
-  /**
-   * Jumlah iterasi dibatasi untuk mencegah
-   * infinite loop apabila konfigurasi TER
-   * di masa depan mengalami perubahan.
-   */
   const maxIterations = 100;
 
   for (
@@ -173,52 +265,75 @@ export function calculateGrossUpRecalculation(
     iteration < maxIterations;
     iteration++
   ) {
+    /**
+     * Hitung kebutuhan allowance berdasarkan
+     * TER kandidat.
+     */
     const oriTaxAllowance =
-      calculateGrossUpAllowance({
-        grossUpBase:
-          input.grossUpBase,
-        terRate: candidateRate,
-      });
+      input.grossUpBases.reduce(
+        (
+          total,
+          grossUpBase,
+        ) =>
+          total +
+          calculateGrossUpAllowance({
+            grossUpBase,
+            terRate:
+              candidateRate,
+          }),
+        0,
+      );
 
+    /**
+     * Adjustment adalah selisih antara
+     * allowance yang seharusnya dan allowance
+     * yang benar-benar sudah diberikan.
+     */
     const grossUpAdjustment =
       oriTaxAllowance -
-      input.actualTaxAllowance;
+      totalActualTaxAllowance;
 
+    /**
+     * Bruto setelah Re-Gross-Up.
+     */
     const brutoOri =
       input.actualGross +
       grossUpAdjustment;
 
-    const resultingTer = getTER(
-      input.category,
-      brutoOri,
-      {
-        TER_A: config.TER_A,
-        TER_B: config.TER_B,
-        TER_C: config.TER_C,
-      },
-    );
+    /**
+     * Tentukan TER berdasarkan bruto
+     * setelah adjustment.
+     */
+    const resultingTer =
+      getTER(
+        input.category,
+        brutoOri,
+        terBrackets,
+      );
 
     /**
-     * TER sudah konsisten dengan brutoOri.
+     * Jika TER sudah konsisten,
+     * perhitungan selesai.
      */
     if (
       resultingTer.rate ===
       candidateRate
     ) {
-      const totalTax = Math.round(
-        brutoOri *
-          resultingTer.rate,
-      );
+      const totalTax =
+        Math.round(
+          brutoOri *
+            resultingTer.rate,
+        );
 
       return {
         actualGross:
           input.actualGross,
 
         grossUpBase:
-          input.grossUpBase,
+          totalGrossUpBase,
 
         actualTaxAllowance:
-          input.actualTaxAllowance,
+          totalActualTaxAllowance,
 
         initialTerRate:
           initialTer.rate,
@@ -237,8 +352,8 @@ export function calculateGrossUpRecalculation(
     }
 
     /**
-     * TER berubah karena brutoOri masuk
-     * ke bracket berikutnya.
+     * TER berubah karena adjustment
+     * mendorong bruto ke bracket berikutnya.
      */
     candidateRate =
       resultingTer.rate;
@@ -253,14 +368,18 @@ function validateGrossUpBase(
   grossUpBase: number,
 ): void {
   if (
-    !Number.isFinite(grossUpBase)
+    !Number.isFinite(
+      grossUpBase,
+    )
   ) {
     throw new Error(
       "Gross-up base harus berupa angka yang valid.",
     );
   }
 
-  if (grossUpBase < 0) {
+  if (
+    grossUpBase < 0
+  ) {
     throw new Error(
       "Gross-up base tidak boleh negatif.",
     );
@@ -292,18 +411,57 @@ function validateRecalculationInput(
     );
   }
 
-  validateGrossUpBase(
-    input.grossUpBase,
-  );
-
   if (
-    !Number.isFinite(
-      input.actualTaxAllowance,
-    ) ||
-    input.actualTaxAllowance < 0
+    !Array.isArray(
+      input.grossUpBases,
+    )
   ) {
     throw new Error(
-      "Actual tax allowance harus berupa angka valid dan tidak boleh negatif.",
+      "Gross-up bases harus berupa array.",
     );
+  }
+
+  if (
+    !Array.isArray(
+      input.actualTaxAllowances,
+    )
+  ) {
+    throw new Error(
+      "Actual tax allowances harus berupa array.",
+    );
+  }
+
+  if (
+    input.grossUpBases.length !==
+    input.actualTaxAllowances.length
+  ) {
+    throw new Error(
+      "Jumlah gross-up bases harus sama dengan jumlah actual tax allowances.",
+    );
+  }
+
+  for (
+    const grossUpBase of
+      input.grossUpBases
+  ) {
+    validateGrossUpBase(
+      grossUpBase,
+    );
+  }
+
+  for (
+    const actualTaxAllowance of
+      input.actualTaxAllowances
+  ) {
+    if (
+      !Number.isFinite(
+        actualTaxAllowance,
+      ) ||
+      actualTaxAllowance < 0
+    ) {
+      throw new Error(
+        "Actual tax allowance harus berupa angka valid dan tidak boleh negatif.",
+      );
+    }
   }
 }

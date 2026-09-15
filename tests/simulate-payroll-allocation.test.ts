@@ -76,10 +76,13 @@ describe(
                 {
                   id: "salary-1",
                   name: "Gaji",
-                  amount: 7_608_027,
+
+                  // Untuk GROSS_UP:
+                  // amount = penghasilan sebelum
+                  // tambahan tunjangan PPh.
+                  amount: 7_493_907,
+
                   treatment: "GROSS_UP",
-                  grossUpBase: 7_493_907,
-                  actualTaxAllowance: 114_120,
                 },
 
                 {
@@ -202,10 +205,13 @@ describe(
                 {
                   id: "salary-1",
                   name: "Gaji",
-                  amount: 7_608_027,
+
+                  // GROSS_UP:
+                  // amount = base sebelum
+                  // tunjangan PPh.
+                  amount: 7_493_907,
+
                   treatment: "GROSS_UP",
-                  grossUpBase: 7_493_907,
-                  actualTaxAllowance: 114_120,
                 },
 
                 {

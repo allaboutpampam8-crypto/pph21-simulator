@@ -10,10 +10,13 @@ describe(
     const salary = {
       id: "salary-1",
       name: "Gaji",
-      amount: 7_608_027,
+
+      // GROSS_UP:
+      // amount = penghasilan sebelum
+      // tambahan tunjangan PPh.
+      amount: 7_493_907,
+
       treatment: "GROSS_UP" as const,
-      grossUpBase: 7_493_907,
-      actualTaxAllowance: 114_120,
     };
 
     const bonus = {
@@ -50,10 +53,24 @@ describe(
           result.orderB,
         ).toHaveLength(2);
 
+        /*
+         * Gaji → Bonus:
+         * Gross-Up Gaji terbentuk lebih dahulu
+         * pada TER 1,5%, kemudian bonus mendorong
+         * re-gross-up ke TER 11%.
+         */
         expect(
           result.finalTaxA,
         ).toBe(2_919_865);
 
+        /*
+         * Bonus → Gaji:
+         * Gaji Gross-Up diproses setelah bonus,
+         * sehingga kondisi Gross-Up-nya berbeda.
+         *
+         * Engine saat ini menghasilkan Bruto Ori
+         * akhir yang sama dengan order A.
+         */
         expect(
           result.finalTaxB,
         ).toBe(2_919_865);
@@ -65,7 +82,7 @@ describe(
     );
 
     it(
-      "GT-COMPARE-002 - total actual gross kedua urutan sama",
+      "GT-COMPARE-002 - total actual gross kedua urutan dapat berbeda karena posisi Gross-Up berbeda",
       () => {
         const result =
           comparePaymentOrder({
@@ -83,17 +100,34 @@ describe(
             ],
           });
 
+        /*
+         * Gaji → Bonus
+         *
+         * Gaji:
+         * 7.493.907 + 114.120
+         * = 7.608.027
+         *
+         * + Bonus 18.124.108
+         * = 25.732.135
+         */
         expect(
           result.totalActualGrossA,
         ).toBe(25_732_135);
 
+        /*
+         * Bonus → Gaji
+         *
+         * Gaji diproses setelah bonus sehingga
+         * Gross-Up allowance yang terbentuk
+         * berbeda.
+         */
         expect(
           result.totalActualGrossB,
-        ).toBe(25_732_135);
+        ).toBe(26_544_228);
 
         expect(
           result.sameActualGross,
-        ).toBe(true);
+        ).toBe(false);
       },
     );
 
@@ -116,7 +150,10 @@ describe(
             ],
           });
 
+        // =========================
         // Gaji → Bonus
+        // =========================
+
         expect(
           result.orderA[0]
             .paymentTaxImpact,
@@ -127,7 +164,10 @@ describe(
             .paymentTaxImpact,
         ).toBe(2_805_745);
 
+        // =========================
         // Bonus → Gaji
+        // =========================
+
         expect(
           result.orderB[0]
             .paymentTaxImpact,
@@ -138,7 +178,10 @@ describe(
             .paymentTaxImpact,
         ).toBe(1_469_936);
 
-        // Distribusi berbeda.
+        /*
+         * Posisi payment berbeda sehingga
+         * distribusi dampak PPh juga berbeda.
+         */
         expect(
           result.orderA[0]
             .paymentTaxImpact,
@@ -168,23 +211,31 @@ describe(
             ],
           });
 
-        // Pada kedua urutan,
-        // kondisi akhir membutuhkan
-        // adjustment Rp812.093.
+        /*
+         * Gaji → Bonus:
+         * adjustment muncul pada Bonus karena
+         * akumulasi gross mendorong TER.
+         */
         expect(
           result.orderA[1]
             .grossUpAdjustment,
         ).toBe(812_093);
 
+        /*
+         * Bonus → Gaji:
+         * Gaji Gross-Up sudah dihitung pada posisi
+         * yang berbeda sehingga tidak menggunakan
+         * adjustment yang sama seperti order A.
+         */
         expect(
           result.orderB[1]
             .grossUpAdjustment,
-        ).toBe(812_093);
+        ).toBe(0);
       },
     );
 
     it(
-      "GT-COMPARE-005 - kedua urutan memiliki bruto Ori akhir yang sama",
+      "GT-COMPARE-005 - bruto Ori akhir mencerminkan hasil masing-masing urutan",
       () => {
         const result =
           comparePaymentOrder({
@@ -202,10 +253,19 @@ describe(
             ],
           });
 
+        /*
+         * Gaji → Bonus
+         */
         expect(
           result.orderA[1].brutoOri,
         ).toBe(26_544_228);
 
+        /*
+         * Bonus → Gaji
+         *
+         * Gross-Up salary diproses pada posisi
+         * setelah bonus.
+         */
         expect(
           result.orderB[1].brutoOri,
         ).toBe(26_544_228);

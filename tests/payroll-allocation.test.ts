@@ -22,10 +22,12 @@ describe(
               {
                 id: "salary-1",
                 name: "Gaji",
-                amount: 7_608_027,
+
+                // Penghasilan sebelum tambahan
+                // tunjangan PPh.
+                amount: 7_493_907,
+
                 treatment: "GROSS_UP",
-                grossUpBase: 7_493_907,
-                actualTaxAllowance: 114_120,
               },
 
               {
@@ -75,10 +77,12 @@ describe(
               {
                 id: "salary-1",
                 name: "Gaji",
-                amount: 7_608_027,
+
+                // Penghasilan sebelum tambahan
+                // tunjangan PPh.
+                amount: 7_493_907,
+
                 treatment: "GROSS_UP",
-                grossUpBase: 7_493_907,
-                actualTaxAllowance: 114_120,
               },
 
               {
@@ -122,10 +126,12 @@ describe(
               {
                 id: "salary-1",
                 name: "Gaji",
-                amount: 7_103_195,
+
+                // Penghasilan sebelum tambahan
+                // tunjangan PPh.
+                amount: 6_463_907,
+
                 treatment: "GROSS_UP",
-                grossUpBase: 6_463_907,
-                actualTaxAllowance: 639_288,
               },
             ],
           });

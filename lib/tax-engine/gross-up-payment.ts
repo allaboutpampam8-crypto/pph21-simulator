@@ -1,5 +1,6 @@
 import { getTaxConfig } from "@/config/tax";
 import {
+  calculateGrossUpAllowance,
   calculateGrossUpRecalculation,
 } from "./gross-up";
 import { getTER } from "./ter";
@@ -18,53 +19,62 @@ export interface GrossUpPaymentResult {
 
   /**
    * Bruto aktual kumulatif sampai payment ini.
+   *
+   * Untuk GROSS_UP, amount user merupakan base
+   * sebelum tunjangan PPh, sehingga bruto aktual
+   * memasukkan allowance yang dihitung engine.
    */
   cumulativeActualGross: number;
 
   /**
-   * TER berdasarkan bruto aktual kumulatif.
+   * TER berdasarkan bruto aktual kumulatif
+   * sebelum Re-Gross-Up adjustment.
    */
   terRate: number;
 
   /**
-   * TER setelah memperhitungkan
-   * mekanisme re-gross-up.
+   * TER final setelah seluruh adjustment
+   * Gross-Up diperhitungkan.
    */
   finalTerRate: number;
 
   /**
-   * Tax allowance yang benar-benar
-   * sudah diberikan pada payment ini.
+   * Tax allowance yang benar-benar terbentuk
+   * pada saat payment GROSS_UP diproses.
+   *
+   * Nilai ini dihasilkan otomatis oleh engine.
    */
   actualTaxAllowance: number;
 
   /**
-   * Gross-up base payment ini.
+   * Base sebelum tunjangan PPh.
+   *
+   * Untuk GROSS_UP = amount.
+   * Untuk GROSS = 0.
    */
   grossUpBase: number;
 
   /**
-   * Total kebutuhan tax allowance dari
-   * seluruh payment GROSS_UP yang sudah
-   * ada sampai posisi ini.
+   * Total kebutuhan allowance dari seluruh
+   * payment GROSS_UP sampai posisi ini.
    */
   oriTaxAllowance: number;
 
   /**
-   * Total adjustment gross-up dari
-   * seluruh payment GROSS_UP yang sudah
-   * ada sampai posisi ini.
+   * Total tambahan allowance yang diperlukan
+   * akibat perubahan TER.
    */
   grossUpAdjustment: number;
 
   /**
-   * Bruto setelah seluruh adjustment
-   * gross-up yang relevan.
+   * Bruto setelah Re-Gross-Up adjustment.
    */
   brutoOri: number;
 
   /**
    * PPh kumulatif setelah adjustment.
+   *
+   * Ini adalah hasil simulasi internal payroll.
    */
   cumulativeTax: number;
 
@@ -84,123 +94,243 @@ export interface GrossUpPaymentCalculationInput {
 }
 
 /**
- * Menghitung payment secara berurutan sekaligus
- * mengevaluasi ulang seluruh payment GROSS_UP
- * ketika kondisi bruto kumulatif berubah.
+ * Menghitung payment payroll secara berurutan.
  *
- * Contoh:
+ * GROSS:
+ *   amount = bruto payment.
  *
- * Gaji GROSS_UP
- *      ↓
- * Bonus GROSS
+ * GROSS_UP:
+ *   amount = penghasilan sebelum tunjangan PPh.
+ *   Tunjangan PPh dihitung otomatis.
  *
- * Ketika bonus masuk, allowance GROSS_UP
- * pada Gaji akan dihitung ulang.
+ * Setiap payment GROSS_UP menyimpan allowance
+ * aktualnya secara internal. Ketika payment
+ * berikutnya menyebabkan TER berubah, allowance
+ * sebelumnya dapat dihitung ulang untuk menentukan
+ * Re-Gross-Up adjustment.
  */
 export function calculateGrossUpPayments(
   input: GrossUpPaymentCalculationInput,
 ): GrossUpPaymentResult[] {
   validateInput(input);
 
-  const config = getTaxConfig(
-    input.taxYear,
-  );
+  const config =
+    getTaxConfig(input.taxYear);
+
+  const terBrackets = {
+    TER_A: config.TER_A,
+    TER_B: config.TER_B,
+    TER_C: config.TER_C,
+  };
 
   const results: GrossUpPaymentResult[] = [];
 
+  /**
+   * Bruto aktual yang benar-benar telah terbentuk
+   * sampai payment sebelumnya.
+   *
+   * Nilai ini sudah termasuk allowance Gross-Up
+   * aktual yang dihasilkan engine.
+   */
   let cumulativeActualGross = 0;
+
+  /**
+   * PPh kumulatif simulasi.
+   */
   let cumulativeTax = 0;
 
-  for (const payment of input.payments) {
-    cumulativeActualGross += payment.amount;
+  /**
+   * Menyimpan allowance aktual setiap payment
+   * GROSS_UP.
+   *
+   * Key   = payment.id
+   * Value = allowance yang benar-benar terbentuk
+   *         ketika payment tersebut diproses.
+   */
+  const originalAllowances =
+    new Map<string, number>();
+
+  for (
+    let paymentIndex = 0;
+    paymentIndex <
+      input.payments.length;
+    paymentIndex++
+  ) {
+    const payment =
+      input.payments[paymentIndex];
 
     /**
-     * TER berdasarkan actual gross sebelum
-     * re-gross-up.
+     * --------------------------------------------------
+     * 1. Tentukan gross payment saat ini
+     * --------------------------------------------------
      */
-    const actualTer = getTER(
-      input.category,
-      cumulativeActualGross,
-      {
-        TER_A: config.TER_A,
-        TER_B: config.TER_B,
-        TER_C: config.TER_C,
-      },
-    );
+
+    let paymentGross =
+      payment.amount;
+
+    let paymentActualTaxAllowance =
+      0;
 
     /**
-     * Ambil seluruh payment GROSS_UP
-     * yang sudah muncul sampai posisi ini.
+     * Untuk GROSS_UP:
      *
-     * Payment GROSS berikutnya dapat menyebabkan
-     * payment GROSS_UP sebelumnya perlu dihitung
-     * ulang.
+     * amount = base sebelum tunjangan PPh.
+     *
+     * Engine mencari allowance yang konsisten
+     * dengan TER setelah payment masuk.
      */
+    if (
+      payment.treatment ===
+      "GROSS_UP"
+    ) {
+      const grossUpResult =
+        calculateInitialGrossUp(
+          input.taxYear,
+          input.category,
+          cumulativeActualGross,
+          payment.amount,
+        );
+
+      paymentActualTaxAllowance =
+        grossUpResult.taxAllowance;
+
+      paymentGross =
+        grossUpResult.gross;
+
+      /**
+       * Simpan allowance aktual.
+       *
+       * Ini bukan input user.
+       */
+      originalAllowances.set(
+        payment.id,
+        paymentActualTaxAllowance,
+      );
+    }
+
+    /**
+     * Bruto aktual setelah payment ini.
+     *
+     * Untuk GROSS:
+     *   previous gross + amount
+     *
+     * Untuk GROSS_UP:
+     *   previous gross + base + allowance
+     */
+    const newCumulativeActualGross =
+      cumulativeActualGross +
+      paymentGross;
+
+    /**
+     * TER aktual berdasarkan bruto
+     * yang benar-benar terbentuk.
+     */
+    const actualTer =
+      getTER(
+        input.category,
+        newCumulativeActualGross,
+        terBrackets,
+      );
+
+    /**
+     * --------------------------------------------------
+     * 2. Ambil seluruh GROSS_UP sampai posisi ini
+     * --------------------------------------------------
+     */
+
     const grossUpPayments =
       input.payments.filter(
-        (candidate, index) =>
-          index <=
-            input.payments.indexOf(
-              payment,
-            ) &&
+        (
+          candidate,
+          index,
+        ) =>
+          index <= paymentIndex &&
           candidate.treatment ===
             "GROSS_UP",
       );
 
-    let totalOriTaxAllowance = 0;
-    let totalGrossUpAdjustment = 0;
-
     /**
-     * Recalculate seluruh GROSS_UP
-     * berdasarkan kondisi kumulatif terbaru.
+     * Base masing-masing GROSS_UP.
+     *
+     * Pada desain baru:
+     *
+     * payment.amount
+     * =
+     * base sebelum tunjangan PPh.
      */
-    for (const grossUpPayment of grossUpPayments) {
-      const recalculation =
-        calculateGrossUpRecalculation({
-          taxYear: input.taxYear,
-          category: input.category,
-
-          actualGross:
-            cumulativeActualGross,
-
-          grossUpBase:
-            grossUpPayment.grossUpBase!,
-
-          actualTaxAllowance:
-            grossUpPayment.actualTaxAllowance!,
-        });
-
-      totalOriTaxAllowance +=
-        recalculation.oriTaxAllowance;
-
-      totalGrossUpAdjustment +=
-        recalculation.grossUpAdjustment;
-    }
+    const grossUpBases =
+      grossUpPayments.map(
+        (candidate) =>
+          candidate.amount,
+      );
 
     /**
-     * Bruto aktual + seluruh adjustment
-     * gross-up yang diperlukan.
+     * Allowance aktual masing-masing
+     * GROSS_UP yang sudah terbentuk.
+     */
+    const actualTaxAllowances =
+      grossUpPayments.map(
+        (candidate) =>
+          originalAllowances.get(
+            candidate.id,
+          ) ?? 0,
+      );
+
+    /**
+     * --------------------------------------------------
+     * 3. Hitung Re-Gross-Up
+     * --------------------------------------------------
+     */
+
+    const recalculation =
+      calculateGrossUpRecalculation({
+        taxYear:
+          input.taxYear,
+
+        category:
+          input.category,
+
+        actualGross:
+          newCumulativeActualGross,
+
+        grossUpBases,
+
+        actualTaxAllowances,
+      });
+
+    /**
+     * Total allowance yang seharusnya tersedia
+     * berdasarkan TER final.
+     */
+    const totalOriTaxAllowance =
+      recalculation.oriTaxAllowance;
+
+    /**
+     * Total adjustment dibandingkan allowance
+     * yang benar-benar sudah terbentuk.
+     */
+    const totalGrossUpAdjustment =
+      recalculation.grossUpAdjustment;
+
+    /**
+     * Bruto setelah adjustment.
      */
     const brutoOri =
-      cumulativeActualGross +
+      newCumulativeActualGross +
       totalGrossUpAdjustment;
 
     /**
-     * Cari TER final berdasarkan bruto
-     * setelah adjustment.
+     * TER final.
      */
-    const finalTer = getTER(
-      input.category,
-      brutoOri,
-      {
-        TER_A: config.TER_A,
-        TER_B: config.TER_B,
-        TER_C: config.TER_C,
-      },
-    );
+    const finalTer =
+      getTER(
+        input.category,
+        brutoOri,
+        terBrackets,
+      );
 
     /**
-     * PPh kumulatif internal payroll.
+     * PPh kumulatif setelah adjustment.
      */
     const currentTax =
       Math.round(
@@ -209,8 +339,7 @@ export function calculateGrossUpPayments(
       );
 
     /**
-     * Selisih terhadap kondisi payment
-     * sebelumnya.
+     * Dampak PPh terhadap payment ini.
      */
     const paymentTaxImpact =
       currentTax -
@@ -220,28 +349,43 @@ export function calculateGrossUpPayments(
       currentTax;
 
     /**
-     * Data allowance yang berasal dari
-     * payment GROSS_UP yang sedang diproses.
+     * Update actual gross.
      *
-     * Untuk payment GROSS nilainya 0 karena
-     * payment tersebut sendiri tidak memberikan
-     * tax allowance.
+     * Adjustment tidak langsung dimasukkan
+     * ke actual gross karena adjustment adalah
+     * hasil Re-Gross-Up internal.
      */
-    const actualTaxAllowance =
-      payment.actualTaxAllowance ??
-      0;
+    cumulativeActualGross =
+      newCumulativeActualGross;
 
-    const grossUpBase =
-      payment.grossUpBase ??
-      0;
-
+    /**
+     * --------------------------------------------------
+     * 4. Simpan hasil payment
+     * --------------------------------------------------
+     *
+     * Penting:
+     *
+     * actualTaxAllowance harus merupakan
+     * allowance yang BENAR-BENAR TERBENTUK
+     * saat payment tersebut pertama kali diproses.
+     *
+     * Bukan allowance hasil Re-Gross-Up.
+     */
     results.push({
-      id: payment.id,
-      name: payment.name,
-      amount: payment.amount,
-      treatment: payment.treatment,
+      id:
+        payment.id,
 
-      cumulativeActualGross,
+      name:
+        payment.name,
+
+      amount:
+        payment.amount,
+
+      treatment:
+        payment.treatment,
+
+      cumulativeActualGross:
+        cumulativeActualGross,
 
       terRate:
         actualTer.rate,
@@ -249,9 +393,14 @@ export function calculateGrossUpPayments(
       finalTerRate:
         finalTer.rate,
 
-      actualTaxAllowance,
+      actualTaxAllowance:
+        paymentActualTaxAllowance,
 
-      grossUpBase,
+      grossUpBase:
+        payment.treatment ===
+        "GROSS_UP"
+          ? payment.amount
+          : 0,
 
       oriTaxAllowance:
         totalOriTaxAllowance,
@@ -259,16 +408,126 @@ export function calculateGrossUpPayments(
       grossUpAdjustment:
         totalGrossUpAdjustment,
 
-      brutoOri,
+      brutoOri:
+        brutoOri,
 
       cumulativeTax:
         currentTax,
 
-      paymentTaxImpact,
+      paymentTaxImpact:
+        paymentTaxImpact,
     });
   }
 
   return results;
+}
+
+/**
+ * Menghitung Gross-Up awal.
+ *
+ * amount/base user:
+ *
+ *   G
+ *
+ * Allowance:
+ *
+ *   A = G × t / (1 - t)
+ *
+ * Karena allowance sendiri masuk bruto,
+ * TER harus dicari secara iterative/bracket-aware.
+ */
+function calculateInitialGrossUp(
+  taxYear: number,
+  category: TERCategory,
+  previousGross: number,
+  grossUpBase: number,
+): {
+  taxAllowance: number;
+  gross: number;
+  terRate: number;
+} {
+  const config =
+    getTaxConfig(taxYear);
+
+  const terBrackets = {
+    TER_A: config.TER_A,
+    TER_B: config.TER_B,
+    TER_C: config.TER_C,
+  };
+
+  /**
+   * Mulai dari bruto tanpa allowance.
+   */
+  let candidateGross =
+    previousGross +
+    grossUpBase;
+
+  let candidateTer =
+    getTER(
+      category,
+      candidateGross,
+      terBrackets,
+    );
+
+  const maxIterations = 100;
+
+  for (
+    let iteration = 0;
+    iteration < maxIterations;
+    iteration++
+  ) {
+    const taxAllowance =
+      calculateGrossUpAllowance({
+        grossUpBase,
+        terRate:
+          candidateTer.rate,
+      });
+
+    const gross =
+      previousGross +
+      grossUpBase +
+      taxAllowance;
+
+    const resultingTer =
+      getTER(
+        category,
+        gross,
+        terBrackets,
+      );
+
+    /**
+     * TER sudah konsisten.
+     */
+    if (
+      resultingTer.rate ===
+      candidateTer.rate
+    ) {
+      return {
+        taxAllowance,
+
+        gross:
+          grossUpBase +
+          taxAllowance,
+
+        terRate:
+          resultingTer.rate,
+      };
+    }
+
+    /**
+     * Gross-Up mendorong bruto
+     * ke bracket berikutnya.
+     */
+    candidateGross =
+      gross;
+
+    candidateTer =
+      resultingTer;
+  }
+
+  throw new Error(
+    "Perhitungan Gross-Up awal tidak mencapai kondisi TER yang konsisten.",
+  );
 }
 
 function validateInput(
@@ -298,7 +557,10 @@ function validateInput(
   const paymentIds =
     new Set<string>();
 
-  for (const payment of input.payments) {
+  for (
+    const payment of
+      input.payments
+  ) {
     if (
       !payment.id ||
       !payment.id.trim()
@@ -342,58 +604,57 @@ function validateInput(
       );
     }
 
+    /**
+     * Pada desain baru, GROSS_UP tidak lagi
+     * menerima grossUpBase maupun
+     * actualTaxAllowance sebagai input.
+     *
+     * Keduanya dihitung oleh engine.
+     */
     if (
       payment.treatment ===
       "GROSS_UP"
     ) {
-      if (
-        payment.grossUpBase ===
-          undefined ||
-        !Number.isFinite(
-          payment.grossUpBase,
-        ) ||
-        payment.grossUpBase < 0
-      ) {
-        throw new Error(
-          `Gross-up base "${payment.name}" wajib diisi dan harus valid.`,
-        );
-      }
+      const legacyPayment =
+        payment as GrossUpPayment & {
+          grossUpBase?: number;
+          actualTaxAllowance?: number;
+        };
 
       if (
-        payment.actualTaxAllowance ===
+        legacyPayment.grossUpBase !==
           undefined ||
-        !Number.isFinite(
-          payment.actualTaxAllowance,
-        ) ||
-        payment.actualTaxAllowance < 0
+        legacyPayment.actualTaxAllowance !==
+          undefined
       ) {
         throw new Error(
-          `Actual tax allowance "${payment.name}" wajib diisi dan harus valid.`,
-        );
-      }
-
-      if (
-        payment.actualTaxAllowance >
-        payment.amount
-      ) {
-        throw new Error(
-          `Actual tax allowance "${payment.name}" tidak boleh melebihi amount.`,
+          `Payment GROSS_UP "${payment.name}" menggunakan field Gross-Up lama. Hapus grossUpBase dan actualTaxAllowance.`,
         );
       }
     }
 
+    /**
+     * GROSS juga tidak boleh membawa
+     * parameter Gross-Up lama.
+     */
     if (
       payment.treatment ===
       "GROSS"
     ) {
+      const legacyPayment =
+        payment as GrossUpPayment & {
+          grossUpBase?: number;
+          actualTaxAllowance?: number;
+        };
+
       if (
-        payment.grossUpBase !==
+        legacyPayment.grossUpBase !==
           undefined ||
-        payment.actualTaxAllowance !==
+        legacyPayment.actualTaxAllowance !==
           undefined
       ) {
         throw new Error(
-          `Payment GROSS "${payment.name}" tidak boleh memiliki gross-up base atau actual tax allowance.`,
+          `Payment GROSS "${payment.name}" tidak boleh memiliki grossUpBase atau actualTaxAllowance.`,
         );
       }
     }

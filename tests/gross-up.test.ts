@@ -23,11 +23,16 @@ describe(
             actualGross:
               25_732_135,
 
-            grossUpBase:
+            // Gross-Up payment yang sudah terjadi
+            grossUpBases: [
               7_493_907,
+            ],
 
-            actualTaxAllowance:
+            // Tunjangan PPh yang benar-benar sudah
+            // diberikan pada saat payroll awal
+            actualTaxAllowances: [
               114_120,
+            ],
           });
 
         expect(
@@ -67,11 +72,16 @@ describe(
             actualGross:
               20_571_842,
 
-            grossUpBase:
+            // Gross-Up salary base
+            grossUpBases: [
               6_463_907,
+            ],
 
-            actualTaxAllowance:
-              0,
+            // Allowance sudah terbentuk
+            // pada proses payroll awal
+            actualTaxAllowances: [
+              639_288,
+            ],
           });
 
         expect(
@@ -86,13 +96,19 @@ describe(
           result.oriTaxAllowance,
         ).toBe(639_288);
 
+        // Karena TER final sama dengan TER awal,
+        // tidak ada tambahan adjustment.
         expect(
           result.grossUpAdjustment,
-        ).toBe(639_288);
+        ).toBe(0);
 
         expect(
           result.brutoOri,
-        ).toBe(21_211_130);
+        ).toBe(20_571_842);
+
+        expect(
+          result.totalTax,
+        ).toBe(1_851_466);
       },
     );
 
@@ -107,11 +123,13 @@ describe(
             actualGross:
               7_708_027,
 
-            grossUpBase:
+            grossUpBases: [
               7_493_907,
+            ],
 
-            actualTaxAllowance:
+            actualTaxAllowances: [
               114_120,
+            ],
           });
 
         expect(
@@ -133,6 +151,10 @@ describe(
         expect(
           result.brutoOri,
         ).toBe(7_708_027);
+
+        expect(
+          result.totalTax,
+        ).toBe(115_620);
       },
     );
 
@@ -144,14 +166,19 @@ describe(
             taxYear: 2026,
             category: "A",
 
+            // Base 24.000.000
+            // + allowance aktual 2.400.000
+            // = actual gross 26.400.000
             actualGross:
-              26_300_000,
+              26_400_000,
 
-            grossUpBase:
+            grossUpBases: [
               24_000_000,
+            ],
 
-            actualTaxAllowance:
+            actualTaxAllowances: [
               2_400_000,
+            ],
           });
 
         expect(
@@ -172,7 +199,11 @@ describe(
 
         expect(
           result.brutoOri,
-        ).toBe(26_866_292);
+        ).toBe(26_966_292);
+
+        expect(
+          result.totalTax,
+        ).toBe(2_966_292);
       },
     );
 
@@ -183,7 +214,9 @@ describe(
           calculateGrossUpAllowance({
             grossUpBase:
               5_000_000,
-            terRate: 0,
+
+            terRate:
+              0,
           }),
         ).toBe(0);
       },

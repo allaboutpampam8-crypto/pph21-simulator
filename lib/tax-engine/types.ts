@@ -345,9 +345,21 @@ export type GrossUpPaymentTreatment =
 export interface GrossUpPayment {
   id: string;
   name: string;
-  amount: number;
-  treatment: GrossUpPaymentTreatment;
 
-  grossUpBase?: number;
-  actualTaxAllowance?: number;
+  /**
+   * Nominal payment.
+   *
+   * GROSS:
+   * amount adalah bruto payment.
+   *
+   * GROSS_UP:
+   * amount adalah penghasilan sebelum
+   * tambahan tunjangan PPh.
+   *
+   * Tunjangan PPh dihitung otomatis oleh
+   * tax engine dan tidak menjadi input user.
+   */
+  amount: number;
+
+  treatment: GrossUpPaymentTreatment;
 }
