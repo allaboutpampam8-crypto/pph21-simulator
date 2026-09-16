@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { calculatePaymentImpactForOrder } from "@/lib/tax-engine/payment-impact";
 
@@ -62,6 +62,11 @@ export default function PaymentOrderComparison({
 
   const [isApplied, setIsApplied] =
     useState(false);
+
+  useEffect(() => {
+    setAlternativeOrder(payments);
+    setIsApplied(false);
+  }, [payments]);
 
   const alternativeResult =
     useMemo<PaymentImpactResult[] | null>(() => {

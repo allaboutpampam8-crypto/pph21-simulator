@@ -22,33 +22,6 @@ export interface PayrollTreatmentValues {
   other: PayrollTreatment;
 }
 
-export interface GrossUpValues {
-  salary: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-  allowance: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-  overtime: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-  holidayAllowance: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-  bonus: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-  other: {
-    grossUpBase: number;
-    actualTaxAllowance: number;
-  };
-}
-
 export interface FinalDeductionValues {
   pensionContribution: number;
   religiousContribution: number;
@@ -65,8 +38,6 @@ interface IncomeFormProps {
   finalGrossIncome: number;
 
   payrollTreatments: PayrollTreatmentValues;
-
-  grossUpValues: GrossUpValues;
 
   onChange: (
     field: keyof IncomeFormValues,
@@ -86,16 +57,7 @@ interface IncomeFormProps {
     field: keyof PayrollTreatmentValues,
     value: PayrollTreatment,
   ) => void;
-
-  onGrossUpValueChange: (
-    field: keyof GrossUpValues,
-    key:
-      | "grossUpBase"
-      | "actualTaxAllowance",
-    value: number,
-  ) => void;
 }
-
 
 const fields: {
   key: keyof IncomeFormValues;
@@ -139,7 +101,6 @@ const fields: {
   },
 ];
 
-
 const deductionFields: {
   key: keyof FinalDeductionValues;
   label: string;
@@ -165,7 +126,6 @@ const deductionFields: {
   },
 ];
 
-
 function formatInputValue(
   value: number,
 ) {
@@ -177,7 +137,6 @@ function formatInputValue(
     "id-ID",
   ).format(value);
 }
-
 
 function parseInputValue(
   value: string,
@@ -192,7 +151,6 @@ function parseInputValue(
   return Number(digits);
 }
 
-
 function formatRupiah(
   value: number,
 ) {
@@ -201,19 +159,16 @@ function formatRupiah(
   ).format(value);
 }
 
-
 export default function IncomeForm({
   values,
   deductions,
   isFinalMonth,
   finalGrossIncome,
   payrollTreatments,
-  grossUpValues,
   onChange,
   onDeductionChange,
   onFinalGrossIncomeChange,
   onPayrollTreatmentChange,
-  onGrossUpValueChange,
 }: IncomeFormProps) {
   const total =
     Object.values(values).reduce(
@@ -221,7 +176,6 @@ export default function IncomeForm({
         sum + value,
       0,
     );
-
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -283,9 +237,6 @@ export default function IncomeForm({
             {fields.map((field) => {
               const treatment =
                 payrollTreatments[field.key];
-
-              const grossUp =
-                grossUpValues[field.key];
 
               return (
                 <div
@@ -397,104 +348,45 @@ export default function IncomeForm({
 
 
                   {/* -----------------------------------------
-                      Gross-Up Detail
+                      GROSS-UP INFORMATION
                   ------------------------------------------ */}
 
                   {values[field.key] > 0 &&
                     treatment === "GROSS_UP" && (
                       <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3">
 
-                        <div className="mb-3">
-                          <p className="text-xs font-semibold text-amber-900">
-                            Detail Gross-Up
-                          </p>
+                        <p className="text-xs font-semibold text-amber-900">
+                          Mekanisme Gross-Up
+                        </p>
 
-                          <p className="mt-1 text-[11px] leading-5 text-amber-700">
-                            Isi berdasarkan mekanisme payroll perusahaan.
-                            Nilai ini digunakan untuk simulasi re-gross-up.
-                          </p>
-                        </div>
+                        <p className="mt-1 text-[11px] leading-5 text-amber-700">
+                          Nilai yang Anda masukkan adalah
+                          penghasilan sebelum tunjangan PPh.
+                          Tunjangan PPh akan dihitung otomatis
+                          oleh simulator.
+                        </p>
 
+                        <div className="mt-3 rounded-lg bg-white/70 p-3">
 
-                        {/* Gross-Up Base */}
+                          <div className="flex items-start gap-2">
 
-                        <div className="mb-3">
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700">
+                              i
+                            </div>
 
-                          <label
-                            htmlFor={`${field.key}-gross-up-base`}
-                            className="mb-1.5 block text-xs font-medium text-slate-700"
-                          >
-                            Gross-Up Base
-                          </label>
-
-                          <div className="relative">
-
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-                              Rp
-                            </span>
-
-                            <input
-                              id={`${field.key}-gross-up-base`}
-                              type="text"
-                              inputMode="numeric"
-                              placeholder="0"
-                              value={formatInputValue(
-                                grossUp.grossUpBase,
-                              )}
-                              onChange={(event) =>
-                                onGrossUpValueChange(
-                                  field.key,
-                                  "grossUpBase",
-                                  parseInputValue(
-                                    event.target.value,
-                                  ),
-                                )
-                              }
-                              className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-right text-sm font-semibold text-slate-900 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-                            />
+                            <p className="text-[11px] leading-5 text-amber-800">
+                              <strong>
+                                Tidak perlu memasukkan
+                                tunjangan pajak secara manual.
+                              </strong>{" "}
+                              Simulator akan menghitung
+                              tunjangan PPh dan melakukan
+                              penyesuaian Gross-Up sesuai
+                              posisi penghasilan kumulatif.
+                            </p>
 
                           </div>
-                        </div>
 
-
-                        {/* Actual Tax Allowance */}
-
-                        <div>
-
-                          <label
-                            htmlFor={`${field.key}-actual-tax-allowance`}
-                            className="mb-1.5 block text-xs font-medium text-slate-700"
-                          >
-                            Tunjangan PPh Aktual
-                          </label>
-
-                          <div className="relative">
-
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-                              Rp
-                            </span>
-
-                            <input
-                              id={`${field.key}-actual-tax-allowance`}
-                              type="text"
-                              inputMode="numeric"
-                              placeholder="0"
-                              value={formatInputValue(
-                                grossUp.actualTaxAllowance,
-                              )}
-                              onChange={(event) =>
-                                onGrossUpValueChange(
-                                  field.key,
-                                  "actualTaxAllowance",
-                                  parseInputValue(
-                                    event.target.value,
-                                  ),
-                                )
-                              }
-                              className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-right text-sm font-semibold text-slate-900 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-                            />
-
-                          </div>
                         </div>
 
                       </div>
@@ -534,13 +426,22 @@ export default function IncomeForm({
               <strong>GROSS</strong> berarti komponen
               penghasilan ditanggung pajaknya oleh pegawai.
               <br />
+
               <strong>GROSS-UP</strong> berarti terdapat
               tunjangan pajak dari pemberi kerja.
             </p>
 
             <p className="mt-2 text-[11px] leading-5 text-blue-700">
-              Pilihan ini digunakan untuk simulasi mekanisme
-              payroll dan tidak mengubah rumus PPh 21 resmi.
+              Pada mode GROSS-UP, cukup masukkan
+              penghasilan sebelum tunjangan PPh.
+              Tunjangan pajak dihitung otomatis oleh
+              simulator.
+            </p>
+
+            <p className="mt-2 text-[11px] leading-5 text-blue-700">
+              Pilihan GROSS / GROSS-UP digunakan untuk
+              simulasi mekanisme payroll dan tidak mengubah
+              rumus PPh 21 resmi.
             </p>
 
           </div>
@@ -561,7 +462,7 @@ export default function IncomeForm({
               Input utama
             </span>
 
-            <p className="text-sm font-semibold text-blue-900">
+            <p className="mt-2 text-sm font-semibold text-blue-900">
               Total Penghasilan Bruto Selama Periode
             </p>
 

@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-import type {
-  TaxSimulationResult,
-} from "@/lib/tax-engine/types";
+import type { TaxSimulationResult } from "@/lib/tax-engine/types";
 
 interface TaxCalculationDetailProps {
   result: TaxSimulationResult;
@@ -38,22 +35,23 @@ export default function TaxCalculationDetail({
         className="flex w-full items-center justify-between gap-4 p-5 text-left sm:p-6"
       >
         <div>
-          <p className="text-sm font-semibold text-blue-600">
+          <p className="text-sm font-semibold tracking-wide text-slate-500">
             🔎 DETAIL PERHITUNGAN
           </p>
 
           <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Dari mana angka PPh 21 ini berasal?
+            Lihat cara angka PPh 21 dihitung
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Buka untuk melihat dasar perhitungan PPh 21
-            yang digunakan oleh simulator.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            Bagian ini menampilkan angka pembentuk dan rumus yang digunakan
+            simulator. Buka jika Anda ingin memeriksa perhitungannya secara
+            lebih rinci.
           </p>
         </div>
 
         <span
-          className={`shrink-0 text-xl text-blue-600 transition-transform ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg text-slate-600 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         >
@@ -61,176 +59,201 @@ export default function TaxCalculationDetail({
         </span>
       </button>
 
-      {/* Content */}
       {isOpen && (
         <div className="border-t border-slate-100 px-5 pb-5 sm:px-6 sm:pb-6">
-          {/* Monthly */}
+          {/* =========================================================
+              MONTHLY
+          ========================================================= */}
           {monthly && (
-            <div className="pt-5">
-              <p className="text-sm font-semibold text-blue-600">
-                MASA PAJAK BIASA
-              </p>
-
-              <h3 className="mt-1 text-lg font-bold text-slate-900">
-                Perhitungan berdasarkan TER
-              </h3>
-
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
-                  <span className="text-sm text-slate-500">
-                    Penghasilan Bruto
-                  </span>
-
-                  <span className="text-sm font-bold text-slate-900">
-                    Rp {formatRupiah(monthly.grossIncome)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
-                  <span className="text-sm text-slate-500">
-                    Kategori TER
-                  </span>
-
-                  <span className="text-sm font-bold text-slate-900">
-                    {monthly.terCategory}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
-                  <span className="text-sm text-slate-500">
-                    TER
-                  </span>
-
-                  <span className="text-sm font-bold text-slate-900">
-                    {formatPercent(monthly.terRate)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Formula */}
-              <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <div className="pt-6">
+              <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                  Rumus simulasi
+                  Masa Pajak Biasa
                 </p>
 
-                <p className="mt-3 text-base font-medium text-blue-950">
-                  Rp {formatRupiah(monthly.grossIncome)}
-                  {" × "}
-                  {formatPercent(monthly.terRate)}
-                </p>
+                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                  Perhitungan PPh 21 dengan TER
+                </h3>
 
-                <div className="my-3 border-t border-blue-100" />
-
-                <p className="text-lg font-bold text-slate-950">
-                  = Rp {formatRupiah(monthly.tax)}
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Pada masa pajak biasa, PPh 21 dihitung berdasarkan penghasilan
+                  bruto masa pajak dan TER yang berlaku.
                 </p>
               </div>
 
-              {/* Result */}
-              <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-slate-900 p-4 text-white">
-                <span className="text-sm">
-                  PPh 21 Masa Pajak
-                </span>
+              {/* Step 1 */}
+              <div className="mt-5">
+                <StepTitle number="1" title="Penghasilan bruto" />
 
-                <span className="text-base font-bold">
-                  Rp {formatRupiah(monthly.tax)}
-                </span>
+                <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <DetailRow
+                    label="Total Penghasilan Bruto"
+                    value={monthly.grossIncome}
+                    emphasized
+                  />
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="mt-5">
+                <StepTitle number="2" title="TER yang digunakan" />
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <DetailRow
+                    label="Kategori TER"
+                    textValue={monthly.terCategory}
+                  />
+
+                  <DetailRow
+                    label="TER yang Berlaku"
+                    textValue={formatPercent(monthly.terRate)}
+                    emphasized
+                  />
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="mt-5">
+                <StepTitle number="3" title="Perhitungan PPh 21" />
+
+                <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                    Rumus
+                  </p>
+
+                  <div className="mt-4 space-y-3">
+                    <FormulaRow
+                      label="Penghasilan Bruto"
+                      value={`Rp ${formatRupiah(monthly.grossIncome)}`}
+                    />
+
+                    <FormulaRow
+                      label="× TER"
+                      value={formatPercent(monthly.terRate)}
+                    />
+
+                    <div className="border-t border-blue-100 pt-3">
+                      <FormulaRow
+                        label="PPh 21 Masa Pajak"
+                        value={`Rp ${formatRupiah(monthly.tax)}`}
+                        emphasized
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Final */}
+          {/* =========================================================
+              FINAL YEAR
+          ========================================================= */}
           {final && (
-            <div className="pt-5">
-              <p className="text-sm font-semibold text-blue-600">
-                MASA PAJAK TERAKHIR
-              </p>
-
-              <h3 className="mt-1 text-lg font-bold text-slate-900">
-                Perhitungan akhir tahun
-              </h3>
-
-              <div className="mt-4 space-y-3">
-                <DetailRow
-                  label="Penghasilan Bruto"
-                  value={final.grossIncome}
-                />
-
-                <DetailRow
-                  label="Biaya Jabatan"
-                  value={final.jobExpense}
-                  negative
-                />
-
-                <DetailRow
-                  label="Iuran Pensiun / Hari Tua"
-                  value={final.pensionContribution}
-                  negative
-                />
-
-                <DetailRow
-                  label="Zakat / Sumbangan Keagamaan"
-                  value={final.religiousContribution}
-                  negative
-                />
-
-                <DetailRow
-                  label="Penghasilan Neto"
-                  value={final.netIncome}
-                  emphasized
-                />
-
-                <DetailRow
-                  label="PTKP"
-                  value={final.ptkp}
-                  negative
-                />
-
-                <DetailRow
-                  label="PKP"
-                  value={final.taxableIncome}
-                  emphasized
-                />
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <div className="mt-8 border-t border-slate-100 pt-6">
+              <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                  Perhitungan PPh
+                  Masa Pajak Terakhir
                 </p>
 
-                <div className="mt-4 space-y-3">
+                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                  Perhitungan PPh 21 akhir tahun
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Pada masa pajak terakhir, simulator menggunakan perhitungan
+                  PPh tahunan dan memperhitungkan PPh yang sudah dipotong
+                  sebelumnya.
+                </p>
+              </div>
+
+              {/* Step 1 */}
+              <div className="mt-5">
+                <StepTitle number="1" title="Pembentukan penghasilan neto" />
+
+                <div className="mt-3 space-y-2">
                   <DetailRow
-                    label="PPh berdasarkan Pasal 17"
-                    value={final.annualTax}
+                    label="Penghasilan Bruto"
+                    value={final.grossIncome}
                   />
 
                   <DetailRow
-                    label="PPh yang sudah dipotong"
-                    value={final.previousTaxWithheld}
+                    label="Biaya Jabatan"
+                    value={final.jobExpense}
                     negative
                   />
+
+                  <DetailRow
+                    label="Iuran Pensiun / Hari Tua"
+                    value={final.pensionContribution}
+                    negative
+                  />
+
+                  <DetailRow
+                    label="Zakat / Sumbangan Keagamaan"
+                    value={final.religiousContribution}
+                    negative
+                  />
+
+                  <DetailRow
+                    label="Penghasilan Neto"
+                    value={final.netIncome}
+                    emphasized
+                  />
                 </div>
+              </div>
 
-                <div className="my-4 border-t border-blue-100" />
+              {/* Step 2 */}
+              <div className="mt-5">
+                <StepTitle
+                  number="2"
+                  title="Pembentukan Penghasilan Kena Pajak"
+                />
 
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm font-semibold text-slate-900">
-                    PPh 21 Masa Terakhir
-                  </span>
+                <div className="mt-3 space-y-2">
+                  <DetailRow label="Penghasilan Neto" value={final.netIncome} />
 
-                  <span className="text-base font-bold text-slate-950">
-                    Rp {formatRupiah(final.finalTax)}
-                  </span>
+                  <DetailRow label="PTKP" value={final.ptkp} negative />
+
+                  <DetailRow
+                    label="Penghasilan Kena Pajak (PKP)"
+                    value={final.taxableIncome}
+                    emphasized
+                  />
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="mt-5">
+                <StepTitle number="3" title="Pembentukan PPh 21" />
+
+                <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                  <div className="space-y-2">
+                    <DetailRow
+                      label="PPh berdasarkan Pasal 17"
+                      value={final.annualTax}
+                    />
+
+                    <DetailRow
+                      label="PPh yang sudah dipotong"
+                      value={final.previousTaxWithheld}
+                      negative
+                    />
+                  </div>
+
+                  <div className="my-4 border-t border-blue-100" />
+
+                  <DetailRow
+                    label="PPh 21 Masa Terakhir"
+                    value={final.finalTax}
+                    emphasized
+                  />
                 </div>
 
                 {final.overpayment > 0 && (
-                  <div className="mt-3 rounded-xl border border-green-100 bg-green-50 p-3">
+                  <div className="mt-3 rounded-2xl border border-green-100 bg-green-50 p-4">
                     <p className="text-xs leading-5 text-green-800">
                       Terdapat kelebihan pemotongan sebesar{" "}
-                      <strong>
-                        Rp {formatRupiah(final.overpayment)}
-                      </strong>
-                      .
+                      <strong>Rp {formatRupiah(final.overpayment)}</strong>.
                     </p>
                   </div>
                 )}
@@ -238,109 +261,123 @@ export default function TaxCalculationDetail({
             </div>
           )}
 
-          {/* Part Year */}
+          {/* =========================================================
+              PART YEAR
+          ========================================================= */}
           {partYear && (
-            <div className="pt-5">
-              <p className="text-sm font-semibold text-blue-600">
-                MASA PAJAK TERAKHIR — PART-YEAR
-              </p>
-
-              <h3 className="mt-1 text-lg font-bold text-slate-900">
-                Perhitungan penghasilan sebagian tahun
-              </h3>
-
-              <div className="mt-4 space-y-3">
-                <DetailRow
-                  label="Penghasilan Bruto"
-                  value={partYear.grossIncome}
-                />
-
-                <DetailRow
-                  label="Biaya Jabatan"
-                  value={partYear.jobExpense}
-                  negative
-                />
-
-                <DetailRow
-                  label="Iuran Pensiun / Hari Tua"
-                  value={partYear.pensionContribution}
-                  negative
-                />
-
-                <DetailRow
-                  label="Zakat / Sumbangan Keagamaan"
-                  value={partYear.religiousContribution}
-                  negative
-                />
-
-                <DetailRow
-                  label="Penghasilan Neto Aktual"
-                  value={partYear.netIncome}
-                  emphasized
-                />
-
-                <DetailRow
-                  label="Neto Disetahunkan"
-                  value={partYear.annualizedNetIncome}
-                  emphasized
-                />
-
-                <DetailRow
-                  label="PTKP"
-                  value={partYear.ptkp}
-                  negative
-                />
-
-                <DetailRow
-                  label="PKP"
-                  value={partYear.taxableIncome}
-                  emphasized
-                />
-              </div>
-
-              <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <div className="mt-8 border-t border-slate-100 pt-6">
+              <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                  Perhitungan PPh
+                  Masa Pajak Terakhir — Part-Year
                 </p>
 
-                <div className="mt-4 space-y-3">
+                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                  Perhitungan untuk penghasilan sebagian tahun
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Perhitungan ini digunakan ketika penghasilan hanya diperoleh
+                  selama sebagian tahun pajak.
+                </p>
+              </div>
+
+              {/* Step 1 */}
+              <div className="mt-5">
+                <StepTitle number="1" title="Pembentukan penghasilan neto" />
+
+                <div className="mt-3 space-y-2">
                   <DetailRow
-                    label="PPh berdasarkan penghasilan disetahunkan"
-                    value={partYear.annualTax}
+                    label="Penghasilan Bruto"
+                    value={partYear.grossIncome}
                   />
 
                   <DetailRow
-                    label="PPh setelah prorata"
-                    value={partYear.proratedTax}
-                  />
-
-                  <DetailRow
-                    label="PPh yang sudah dipotong"
-                    value={partYear.previousTaxWithheld}
+                    label="Biaya Jabatan"
+                    value={partYear.jobExpense}
                     negative
                   />
+
+                  <DetailRow
+                    label="Iuran Pensiun / Hari Tua"
+                    value={partYear.pensionContribution}
+                    negative
+                  />
+
+                  <DetailRow
+                    label="Zakat / Sumbangan Keagamaan"
+                    value={partYear.religiousContribution}
+                    negative
+                  />
+
+                  <DetailRow
+                    label="Penghasilan Neto Aktual"
+                    value={partYear.netIncome}
+                    emphasized
+                  />
                 </div>
+              </div>
 
-                <div className="my-4 border-t border-blue-100" />
+              {/* Step 2 */}
+              <div className="mt-5">
+                <StepTitle
+                  number="2"
+                  title="Penyesuaian penghasilan untuk perhitungan tahunan"
+                />
 
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm font-semibold text-slate-900">
-                    PPh 21 Masa Terakhir
-                  </span>
+                <div className="mt-3 space-y-2">
+                  <DetailRow
+                    label="Neto Disetahunkan"
+                    value={partYear.annualizedNetIncome}
+                    emphasized
+                  />
 
-                  <span className="text-base font-bold text-slate-950">
-                    Rp {formatRupiah(partYear.finalTax)}
-                  </span>
+                  <DetailRow label="PTKP" value={partYear.ptkp} negative />
+
+                  <DetailRow
+                    label="Penghasilan Kena Pajak (PKP)"
+                    value={partYear.taxableIncome}
+                    emphasized
+                  />
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="mt-5">
+                <StepTitle number="3" title="Pembentukan PPh 21" />
+
+                <div className="mt-3 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                  <div className="space-y-2">
+                    <DetailRow
+                      label="PPh berdasarkan penghasilan disetahunkan"
+                      value={partYear.annualTax}
+                    />
+
+                    <DetailRow
+                      label="PPh setelah prorata"
+                      value={partYear.proratedTax}
+                    />
+
+                    <DetailRow
+                      label="PPh yang sudah dipotong"
+                      value={partYear.previousTaxWithheld}
+                      negative
+                    />
+                  </div>
+
+                  <div className="my-4 border-t border-blue-100" />
+
+                  <DetailRow
+                    label="PPh 21 Masa Terakhir"
+                    value={partYear.finalTax}
+                    emphasized
+                  />
                 </div>
 
                 {partYear.overpayment > 0 && (
-                  <div className="mt-3 rounded-xl border border-green-100 bg-green-50 p-3">
+                  <div className="mt-3 rounded-2xl border border-green-100 bg-green-50 p-4">
                     <p className="text-xs leading-5 text-green-800">
                       Terdapat kelebihan pemotongan sebesar{" "}
-                      <strong>
-                        Rp {formatRupiah(partYear.overpayment)}
-                      </strong>
-                      .
+                      <strong>Rp {formatRupiah(partYear.overpayment)}</strong>.
                     </p>
                   </div>
                 )}
@@ -348,13 +385,14 @@ export default function TaxCalculationDetail({
             </div>
           )}
 
-          {/* Educational note */}
-          <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+          {/* =========================================================
+              FOOTNOTE
+          ========================================================= */}
+          <div className="mt-8 rounded-2xl border border-amber-100 bg-amber-50 p-4">
             <p className="text-xs leading-5 text-amber-800">
-              <strong>Catatan:</strong> Detail ini menampilkan
-              hasil perhitungan dari simulator berdasarkan
-              data yang Anda masukkan. Hasil bukan merupakan
-              bukti potong atau dokumen perpajakan resmi.
+              <strong>Catatan:</strong> bagian ini merupakan jejak perhitungan
+              dari simulator berdasarkan data yang dimasukkan. Hasil simulasi
+              bukan merupakan bukti potong atau dokumen perpajakan resmi.
             </p>
           </div>
         </div>
@@ -363,9 +401,35 @@ export default function TaxCalculationDetail({
   );
 }
 
+/* ===============================================================
+   STEP TITLE
+=============================================================== */
+
+interface StepTitleProps {
+  number: string;
+  title: string;
+}
+
+function StepTitle({ number, title }: StepTitleProps) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
+        {number}
+      </div>
+
+      <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
+    </div>
+  );
+}
+
+/* ===============================================================
+   DETAIL ROW
+=============================================================== */
+
 interface DetailRowProps {
   label: string;
-  value: number;
+  value?: number;
+  textValue?: string;
   negative?: boolean;
   emphasized?: boolean;
 }
@@ -373,36 +437,70 @@ interface DetailRowProps {
 function DetailRow({
   label,
   value,
+  textValue,
   negative = false,
   emphasized = false,
 }: DetailRowProps) {
   return (
     <div
       className={`flex items-center justify-between gap-4 rounded-2xl p-4 ${
-        emphasized
-          ? "bg-blue-50"
-          : "bg-slate-50"
+        emphasized ? "bg-white ring-1 ring-blue-100" : "bg-slate-50"
       }`}
     >
       <span
         className={`text-sm ${
-          emphasized
-            ? "font-semibold text-slate-700"
-            : "text-slate-500"
+          emphasized ? "font-semibold text-slate-700" : "text-slate-500"
         }`}
       >
         {label}
       </span>
 
       <span
-        className={`text-sm ${
+        className={`text-right text-sm ${
           emphasized
             ? "font-bold text-slate-950"
             : "font-semibold text-slate-900"
         }`}
       >
-        {negative && value > 0 ? "- " : ""}
-        Rp {formatRupiah(value)}
+        {textValue !== undefined
+          ? textValue
+          : value !== undefined
+            ? `${negative && value > 0 ? "- " : ""}Rp ${formatRupiah(value)}`
+            : "-"}
+      </span>
+    </div>
+  );
+}
+
+/* ===============================================================
+   FORMULA ROW
+=============================================================== */
+
+interface FormulaRowProps {
+  label: string;
+  value: string;
+  emphasized?: boolean;
+}
+
+function FormulaRow({ label, value, emphasized = false }: FormulaRowProps) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span
+        className={`text-sm ${
+          emphasized ? "font-semibold text-slate-800" : "text-slate-600"
+        }`}
+      >
+        {label}
+      </span>
+
+      <span
+        className={`text-right ${
+          emphasized
+            ? "text-base font-bold text-slate-950"
+            : "text-sm font-semibold text-slate-900"
+        }`}
+      >
+        {value}
       </span>
     </div>
   );
