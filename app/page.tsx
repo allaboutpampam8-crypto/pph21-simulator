@@ -84,9 +84,9 @@ function PayrollDetail({
   textValue?: string;
 }) {
   return (
-    <div className="rounded-xl bg-white p-3">
-      <p className="text-xs leading-5 text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-bold text-slate-900">
+    <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs transition-all hover:border-slate-300">
+      <p className="text-xs font-medium leading-5 text-slate-500">{label}</p>
+      <p className="mt-1 font-mono text-sm font-bold text-slate-900">
         {textValue ?? `Rp ${formatRupiah(value ?? 0)}`}
       </p>
     </div>
@@ -440,19 +440,25 @@ export default function Home() {
           HEADER
       ====================================================== */}
 
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-6">
-          <div>
-            <p className="text-lg font-bold tracking-tight text-slate-900">
-              PPh 21 Simulator
-            </p>
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 font-mono text-base font-extrabold text-white shadow-xs">
+              %
+            </div>
+            <div>
+              <p className="text-lg font-bold tracking-tight text-slate-900">
+                PPh 21 Simulator
+              </p>
 
-            <p className="text-xs text-slate-500">
-              Simulasi edukasi pajak penghasilan
-            </p>
+              <p className="text-xs text-slate-500">
+                Simulasi edukasi pajak penghasilan
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+          <div className="flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/80 px-3.5 py-1.5 text-xs font-bold text-blue-700 shadow-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse"></span>
             {TAX_YEAR}
           </div>
         </div>
@@ -462,14 +468,15 @@ export default function Home() {
           HERO
       ====================================================== */}
 
-      <section className="bg-white">
+      <section className="border-b border-slate-200/60 bg-gradient-to-b from-blue-50/50 via-slate-50/40 to-slate-50">
         <div className="mx-auto max-w-5xl px-5 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-blue-700 shadow-xs">
+              <span className="h-2 w-2 rounded-full bg-blue-600"></span>
               Simulasi PPh 21
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
               Pahami PPh 21 Anda
             </h1>
 
@@ -548,7 +555,7 @@ export default function Home() {
           <button
             type="button"
             onClick={handleSimulate}
-            className="w-full rounded-2xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 active:scale-[0.99]"
+            className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-6 py-4.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/35 active:scale-[0.99]"
           >
             Simulasikan PPh 21 →
           </button>
@@ -558,7 +565,7 @@ export default function Home() {
           ================================================== */}
 
           {isFinalMonth && finalGrossIncome <= 0 && (
-            <p className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+            <p className="mt-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs leading-5 text-amber-800">
               Untuk masa pajak terakhir, isi{" "}
               <strong>Total Penghasilan Bruto Periode</strong> sebelum
               menjalankan simulasi.
@@ -568,7 +575,7 @@ export default function Home() {
           {isFinalMonth &&
             finalGrossIncome > 0 &&
             finalGrossIncome < getIncomeTotal(income) && (
-              <p className="mt-3 rounded-2xl border border-red-100 bg-red-50 p-3 text-xs leading-5 text-red-800">
+              <p className="mt-3 rounded-2xl border border-red-200/80 bg-red-50/70 p-3.5 text-xs leading-5 text-red-800">
                 Total bruto periode tidak boleh lebih kecil daripada bruto masa
                 pajak terakhir.
               </p>
@@ -587,48 +594,48 @@ export default function Home() {
 
             {result.monthly && (
               <>
-                <div className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm sm:p-6">
+                <div className="rounded-3xl border border-blue-200/80 bg-white p-5 shadow-xs transition-shadow sm:p-7">
                   <div className="mb-6">
-                    <p className="text-sm font-semibold text-blue-600">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
                       HASIL SIMULASI
                     </p>
 
-                    <h2 className="mt-1 text-xl font-bold text-slate-900">
+                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                       PPh 21 Masa Pajak
                     </h2>
                   </div>
 
-                  <div className="rounded-3xl bg-blue-50 p-6">
-                    <p className="text-sm font-medium text-blue-700">
+                  <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-md shadow-blue-500/20 sm:p-7">
+                    <p className="text-sm font-medium text-blue-100">
                       PPh 21 yang disimulasikan
                     </p>
 
-                    <p className="mt-2 text-4xl font-bold tracking-tight text-slate-950">
+                    <p className="mt-2 font-mono text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
                       Rp {formatRupiah(result.monthly.tax)}
                     </p>
                   </div>
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <p className="text-xs text-slate-500">Total Bruto</p>
+                    <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                      <p className="text-xs font-medium text-slate-500">Total Bruto</p>
 
-                      <p className="mt-1 text-base font-bold text-slate-900">
+                      <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                         Rp {formatRupiah(result.monthly.grossIncome)}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <p className="text-xs text-slate-500">Kategori TER</p>
+                    <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                      <p className="text-xs font-medium text-slate-500">Kategori TER</p>
 
-                      <p className="mt-1 text-base font-bold text-slate-900">
+                      <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                         {result.monthly.terCategory}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <p className="text-xs text-slate-500">TER Saat Ini</p>
+                    <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                      <p className="text-xs font-medium text-slate-500">TER Saat Ini</p>
 
-                      <p className="mt-1 text-base font-bold text-slate-900">
+                      <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                         {result.monthly.terRate * 100}%
                       </p>
                     </div>
@@ -640,20 +647,20 @@ export default function Home() {
                 ============================================== */}
 
                 {result.payrollAllocation && hasGrossUpPayment && (
-                  <div className="mt-6 rounded-3xl border border-amber-200 bg-white p-5 shadow-sm sm:p-6">
+                  <div className="mt-6 rounded-3xl border border-amber-200/90 bg-white p-5 shadow-xs sm:p-7">
                     {/* HEADER */}
                     <div className="mb-5">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-sm">
                           🧾
                         </span>
 
-                        <p className="text-sm font-semibold text-amber-600">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
                           MEKANISME PAYROLL
                         </p>
                       </div>
 
-                      <h2 className="mt-3 text-xl font-bold text-slate-900">
+                      <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">
                         Gross-Up & Re-Gross-Up
                       </h2>
 
@@ -677,20 +684,20 @@ export default function Home() {
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 shadow-xs">
                           {payrollPayments.length} pembayaran
                         </span>
                       </div>
 
-                      <div className="mt-4 space-y-3">
+                      <div className="mt-4 space-y-3.5">
                         {payrollPayments.map((payment, index) => (
                           <div
                             key={payment.id}
-                            className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                            className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4.5 transition-all hover:bg-slate-50 hover:border-slate-300"
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="flex items-start gap-3">
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-amber-700 shadow-sm">
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-xs font-bold text-white shadow-xs">
                                   {String(index + 1).padStart(2, "0")}
                                 </span>
                                 <div>
@@ -706,10 +713,10 @@ export default function Home() {
                               </div>
 
                               <span
-                                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                                className={`rounded-full px-3 py-1 text-xs font-bold shadow-xs ${
                                   payment.treatment === "GROSS_UP"
-                                    ? "bg-amber-100 text-amber-800"
-                                    : "bg-slate-200 text-slate-700"
+                                    ? "bg-amber-100 border border-amber-300/80 text-amber-800"
+                                    : "bg-slate-100 border border-slate-200 text-slate-700"
                                 }`}
                               >
                                 {payment.treatment === "GROSS_UP"
@@ -799,7 +806,7 @@ export default function Home() {
                     </div>
 
                     {finalPayrollPayment && (
-                      <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 p-4 sm:p-5">
+                      <div className="mt-5 rounded-2xl border border-amber-200/90 bg-gradient-to-b from-amber-50/70 via-amber-50/30 to-white p-4.5 sm:p-6 shadow-xs">
                         <p className="text-sm font-bold text-amber-950">
                           Tahap 3 — Re-Gross-Up setelah bruto bertambah
                         </p>
@@ -849,7 +856,7 @@ export default function Home() {
                     )}
 
                     {hasGrossUpPayment && (
-                      <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                      <div className="mt-4 rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4.5">
                         <p className="text-sm font-bold text-blue-900">
                           Hubungkan dengan slip gaji
                         </p>
@@ -865,14 +872,14 @@ export default function Home() {
                     )}
 
                     {/* =====================================================
-        MAIN RESULT
-    ====================================================== */}
+                        MAIN RESULT
+                    ====================================================== */}
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl bg-slate-50 p-4">
-                        <p className="text-xs text-slate-500">PPh 21 Resmi</p>
+                    <div className="mt-5 grid gap-3.5 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4.5 transition-all hover:bg-slate-50 hover:border-slate-300">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">PPh 21 Resmi</p>
 
-                        <p className="mt-1 text-lg font-bold text-slate-900">
+                        <p className="mt-1 font-mono text-xl font-extrabold text-slate-900">
                           Rp{" "}
                           {formatRupiah(result.payrollAllocation.officialTax)}
                         </p>
@@ -882,12 +889,12 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div className="rounded-2xl bg-amber-50 p-4">
-                        <p className="text-xs text-amber-700">
+                      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/60 p-4.5 transition-all hover:bg-amber-50/80 hover:border-amber-300">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
                           Gross-Up Adjustment
                         </p>
 
-                        <p className="mt-1 text-lg font-bold text-amber-900">
+                        <p className="mt-1 font-mono text-xl font-extrabold text-amber-900">
                           Rp{" "}
                           {formatRupiah(
                             result.payrollAllocation.grossUpAdjustment,
@@ -900,10 +907,10 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div className="rounded-2xl bg-slate-50 p-4">
-                        <p className="text-xs text-slate-500">Bruto Aktual</p>
+                      <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4.5 transition-all hover:bg-slate-50 hover:border-slate-300">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Bruto Aktual</p>
 
-                        <p className="mt-1 text-lg font-bold text-slate-900">
+                        <p className="mt-1 font-mono text-xl font-extrabold text-slate-900">
                           Rp{" "}
                           {formatRupiah(result.payrollAllocation.actualGross)}
                         </p>
@@ -913,12 +920,12 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div className="rounded-2xl bg-amber-50 p-4">
-                        <p className="text-xs text-amber-700">
+                      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/60 p-4.5 transition-all hover:bg-amber-50/80 hover:border-amber-300">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
                           Bruto Setelah Re-Gross-Up
                         </p>
 
-                        <p className="mt-1 text-lg font-bold text-amber-900">
+                        <p className="mt-1 font-mono text-xl font-extrabold text-amber-900">
                           Rp {formatRupiah(result.payrollAllocation.brutoOri)}
                         </p>
 
@@ -930,10 +937,10 @@ export default function Home() {
                     </div>
 
                     {/* =====================================================
-        AUDIT TRAIL
-    ====================================================== */}
+                        AUDIT TRAIL
+                    ====================================================== */}
 
-                    <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                    <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-5 sm:p-6">
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-bold text-slate-900">
@@ -946,26 +953,26 @@ export default function Home() {
                           </p>
                         </div>
 
-                        <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-slate-500">
+                        <span className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-xs">
                           AUDIT TRAIL
                         </span>
                       </div>
 
                       <div className="mt-5 space-y-3">
                         {/* 01 */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3.5">
                           <div className="flex w-8 shrink-0 justify-center">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-slate-600 shadow-sm">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-xs font-bold text-slate-700 shadow-xs border border-slate-200">
                               1
                             </div>
                           </div>
 
-                          <div className="flex-1 rounded-2xl bg-white p-4">
-                            <p className="text-xs font-semibold text-slate-500">
+                          <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                               BRUTO AKTUAL
                             </p>
 
-                            <p className="mt-1 text-xl font-bold text-slate-950">
+                            <p className="mt-1 font-mono text-xl font-extrabold text-slate-950">
                               Rp{" "}
                               {formatRupiah(
                                 result.payrollAllocation.actualGross,
@@ -980,22 +987,22 @@ export default function Home() {
                         </div>
 
                         {/* CONNECTOR */}
-                        <div className="ml-4 h-3 border-l border-dashed border-slate-300" />
+                        <div className="ml-4 h-3 border-l-2 border-dashed border-slate-300" />
 
                         {/* 02 */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3.5">
                           <div className="flex w-8 shrink-0 justify-center">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-700">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-xs font-bold text-amber-800 border border-amber-200 shadow-xs">
                               2
                             </div>
                           </div>
 
-                          <div className="flex-1 rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                            <p className="text-xs font-semibold text-amber-700">
+                          <div className="flex-1 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 shadow-xs">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
                               KEBUTUHAN PENYESUAIAN
                             </p>
 
-                            <p className="mt-1 text-xl font-bold text-amber-900">
+                            <p className="mt-1 font-mono text-xl font-extrabold text-amber-900">
                               Rp{" "}
                               {formatRupiah(
                                 result.payrollAllocation.grossUpAdjustment,
@@ -1011,22 +1018,22 @@ export default function Home() {
                         </div>
 
                         {/* CONNECTOR */}
-                        <div className="ml-4 h-3 border-l border-dashed border-slate-300" />
+                        <div className="ml-4 h-3 border-l-2 border-dashed border-slate-300" />
 
                         {/* 03 */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3.5">
                           <div className="flex w-8 shrink-0 justify-center">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-100 text-xs font-bold text-blue-800 border border-blue-200 shadow-xs">
                               3
                             </div>
                           </div>
 
-                          <div className="flex-1 rounded-2xl bg-white p-4">
-                            <p className="text-xs font-semibold text-slate-500">
+                          <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                               BRUTO SETELAH RE-GROSS-UP
                             </p>
 
-                            <p className="mt-1 text-xl font-bold text-slate-950">
+                            <p className="mt-1 font-mono text-xl font-extrabold text-slate-950">
                               Rp{" "}
                               {formatRupiah(result.payrollAllocation.brutoOri)}
                             </p>
@@ -1040,29 +1047,29 @@ export default function Home() {
                         </div>
 
                         {/* CONNECTOR */}
-                        <div className="ml-4 h-3 border-l border-dashed border-slate-300" />
+                        <div className="ml-4 h-3 border-l-2 border-dashed border-slate-300" />
 
                         {/* 04 */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-3.5">
                           <div className="flex w-8 shrink-0 justify-center">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white shadow-xs">
                               4
                             </div>
                           </div>
 
-                          <div className="flex-1 rounded-2xl bg-slate-900 p-4 text-white">
-                            <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4.5 text-white border border-slate-800 shadow-sm">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
                               <div>
-                                <p className="text-xs font-semibold text-slate-300">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                                   PPh 21 RESMI
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-400">
+                                <p className="mt-1 text-xs text-slate-300">
                                   Hasil akhir PPh 21 masa pajak
                                 </p>
                               </div>
 
-                              <p className="text-xl font-bold">
+                              <p className="font-mono text-2xl font-extrabold tracking-tight text-white">
                                 Rp{" "}
                                 {formatRupiah(
                                   result.payrollAllocation.officialTax,
@@ -1075,10 +1082,10 @@ export default function Home() {
                     </div>
 
                     {/* =====================================================
-        HOW TO READ
-    ====================================================== */}
+                        HOW TO READ
+                    ====================================================== */}
 
-                    <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:p-5">
+                    <div className="mt-5 rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4.5 sm:p-5">
                       <div className="flex items-start gap-3">
                         <span className="mt-0.5 text-base">💡</span>
 
@@ -1116,10 +1123,10 @@ export default function Home() {
                     </div>
 
                     {/* =====================================================
-        IMPORTANT NOTE
-    ====================================================== */}
+                        IMPORTANT NOTE
+                    ====================================================== */}
 
-                    <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                    <div className="mt-4 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4">
                       <div className="flex items-start gap-3">
                         <span className="mt-0.5">⚠️</span>
 
@@ -1169,13 +1176,13 @@ export default function Home() {
             ================================================== */}
 
             {result.final && (
-              <div className="mt-6 rounded-3xl border border-blue-100 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mt-6 rounded-3xl border border-blue-200/80 bg-white p-5 shadow-xs sm:p-7">
                 <div className="mb-6">
-                  <p className="text-sm font-semibold text-blue-600">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
                     HASIL PERHITUNGAN AKHIR
                   </p>
 
-                  <h2 className="mt-1 text-xl font-bold text-slate-900">
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                     PPh 21 Masa Pajak Terakhir
                   </h2>
 
@@ -1186,8 +1193,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-3xl bg-blue-50 p-6">
-                  <p className="text-sm font-medium text-blue-700">
+                <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-md shadow-blue-500/20 sm:p-7">
+                  <p className="text-sm font-medium text-blue-100">
                     {result.final.finalTax > 0
                       ? "PPh 21 yang Masih Harus Dipotong"
                       : result.final.overpayment > 0
@@ -1195,7 +1202,7 @@ export default function Home() {
                         : "PPh 21 Final"}
                   </p>
 
-                  <p className="mt-2 text-4xl font-bold tracking-tight text-slate-950">
+                  <p className="mt-2 font-mono text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
                     Rp{" "}
                     {formatRupiah(
                       result.final.finalTax > 0
@@ -1204,7 +1211,7 @@ export default function Home() {
                     )}
                   </p>
 
-                  <p className="mt-2 text-sm leading-5 text-blue-700">
+                  <p className="mt-2 text-sm leading-5 text-blue-100">
                     {result.final.finalTax > 0
                       ? "Ini adalah selisih PPh 21 yang masih perlu dipotong pada masa pajak terakhir."
                       : result.final.overpayment > 0
@@ -1214,44 +1221,44 @@ export default function Home() {
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                    <p className="text-xs font-medium text-slate-500">
                       Penghasilan Bruto Periode
                     </p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                       Rp {formatRupiah(result.final.grossIncome)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">Penghasilan Neto</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                    <p className="text-xs font-medium text-slate-500">Penghasilan Neto</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                       Rp {formatRupiah(result.final.netIncome)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">PTKP</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                    <p className="text-xs font-medium text-slate-500">PTKP</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                       Rp {formatRupiah(result.final.ptkp)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">PKP</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 transition-all hover:bg-slate-50 hover:border-slate-300/80">
+                    <p className="text-xs font-medium text-slate-500">PKP</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
                       Rp {formatRupiah(result.final.taxableIncome)}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                <div className="mt-5 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
                   <div className="mb-4">
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-bold text-slate-900">
                       Bagaimana hasil akhirnya?
                     </p>
 
@@ -1267,7 +1274,7 @@ export default function Home() {
                         PPh 21 terutang selama periode
                       </span>
 
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="font-mono text-sm font-bold text-slate-900">
                         Rp {formatRupiah(result.final.annualTax)}
                       </span>
                     </div>
@@ -1277,7 +1284,7 @@ export default function Home() {
                         PPh 21 sudah dipotong
                       </span>
 
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="font-mono text-sm font-bold text-slate-900">
                         Rp {formatRupiah(result.final.previousTaxWithheld)}
                       </span>
                     </div>
@@ -1292,7 +1299,7 @@ export default function Home() {
                               : "Selisih"}
                         </span>
 
-                        <span className="text-base font-bold text-slate-900">
+                        <span className="font-mono text-base font-bold text-slate-900">
                           Rp{" "}
                           {formatRupiah(
                             result.final.finalTax > 0
@@ -1306,8 +1313,8 @@ export default function Home() {
                 </div>
 
                 {result.final.overpayment > 0 && (
-                  <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                    <p className="text-sm font-semibold text-amber-900">
+                  <div className="mt-4 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4">
+                    <p className="text-sm font-bold text-amber-900">
                       Terdapat kelebihan pemotongan
                     </p>
 
@@ -1326,13 +1333,13 @@ export default function Home() {
             ================================================== */}
 
             {result.partYear && (
-              <div className="mt-6 rounded-3xl border border-blue-100 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mt-6 rounded-3xl border border-blue-200/80 bg-white p-5 shadow-xs sm:p-7">
                 <div className="mb-6">
-                  <p className="text-sm font-semibold text-blue-600">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
                     HASIL PERHITUNGAN AKHIR
                   </p>
 
-                  <h2 className="mt-1 text-xl font-bold text-slate-900">
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
                     PPh 21 Masa Pajak Terakhir
                   </h2>
 
@@ -1342,87 +1349,87 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-3xl bg-blue-50 p-6">
-                  <p className="text-sm font-medium text-blue-700">
+                <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-md shadow-blue-500/20 sm:p-7">
+                  <p className="text-sm font-medium text-blue-100">
                     PPh 21 Final
                   </p>
 
-                  <p className="mt-2 text-4xl font-bold tracking-tight text-slate-950">
+                  <p className="mt-2 font-mono text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
                     Rp {formatRupiah(result.partYear.finalTax)}
                   </p>
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">Penghasilan Bruto</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium text-slate-500">Penghasilan Bruto</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.grossIncome)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium text-slate-500">
                       Penghasilan Neto Aktual
                     </p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.netIncome)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">Neto Disetahunkan</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium text-slate-500">Neto Disetahunkan</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.annualizedNetIncome)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">PKP</p>
+                  <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium text-slate-500">PKP</p>
 
-                    <p className="mt-1 text-base font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-base font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.taxableIncome)}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-slate-200 p-4">
+                <div className="mt-5 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-slate-600">
                       PPh berdasarkan penghasilan disetahunkan
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="font-mono text-sm font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.annualTax)}
                     </span>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-slate-600">
                       PPh setelah prorata
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="font-mono text-sm font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.proratedTax)}
                     </span>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-slate-600">
                       PPh 21 yang sudah dipotong
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="font-mono text-sm font-bold text-slate-900">
                       Rp {formatRupiah(result.partYear.previousTaxWithheld)}
                     </span>
                   </div>
                 </div>
 
                 {result.partYear.overpayment > 0 && (
-                  <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                    <p className="text-sm font-semibold text-amber-900">
+                  <div className="mt-4 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4">
+                    <p className="text-sm font-bold text-amber-900">
                       Terdapat kelebihan pemotongan
                     </p>
 
@@ -1441,12 +1448,17 @@ export default function Home() {
         ====================================================== */}
 
         {!result && (
-          <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="font-semibold text-slate-800">
+          <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-xs">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p className="text-base font-bold text-slate-800">
               Hasil simulasi akan muncul di sini
             </p>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+            <p className="mx-auto mt-1.5 max-w-md text-sm leading-6 text-slate-500">
               Masukkan minimal satu komponen penghasilan, kemudian tekan tombol
               Simulasikan PPh 21.
             </p>

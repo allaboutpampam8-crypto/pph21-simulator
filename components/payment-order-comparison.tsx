@@ -131,7 +131,7 @@ export default function PaymentOrderComparison({
   };
 
   return (
-    <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="mt-6 rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-7">
       {/* Header */}
       <button
         type="button"
@@ -139,14 +139,14 @@ export default function PaymentOrderComparison({
         onClick={() =>
           setIsOpen((current) => !current)
         }
-        className="flex w-full items-center justify-between gap-4 text-left"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 text-left"
       >
         <div>
-          <p className="text-sm font-semibold tracking-wide text-blue-600">
+          <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
             🔄 COBA URUTAN PEMBAYARAN LAIN
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
             Bagaimana jika urutannya berbeda?
           </h2>
 
@@ -159,8 +159,8 @@ export default function PaymentOrderComparison({
 
         <span
           aria-hidden="true"
-          className={`shrink-0 text-xl text-blue-600 transition-transform ${
-            isOpen ? "rotate-180" : ""
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 shadow-2xs transition-transform duration-200 ${
+            isOpen ? "rotate-180 border-blue-200 bg-blue-50 text-blue-600" : ""
           }`}
         >
           ↓
@@ -170,7 +170,7 @@ export default function PaymentOrderComparison({
       {isOpen && (
         <div className="mt-6">
           {/* Explanation */}
-          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+          <div className="rounded-2xl border border-blue-200/80 bg-blue-50/70 p-4.5">
             <p className="text-sm leading-6 text-blue-900">
               Fitur ini hanya digunakan untuk
               membandingkan{" "}
@@ -183,11 +183,11 @@ export default function PaymentOrderComparison({
 
           {/* Order list */}
           <div className="mt-5">
-            <p className="mb-3 text-sm font-semibold text-slate-900">
+            <p className="mb-3 text-sm font-bold text-slate-900">
               Atur urutan pembayaran
             </p>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {alternativeOrder.map(
                 (payment, index) => {
                   const isFirst = index === 0;
@@ -198,20 +198,20 @@ export default function PaymentOrderComparison({
                   return (
                     <div
                       key={`${payment.name}-${payment.type}`}
-                      className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                      className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all hover:border-slate-300"
                     >
                       {/* Number */}
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-blue-600 shadow-sm">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-xs">
                         {index + 1}
                       </div>
 
                       {/* Payment */}
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-slate-900">
+                        <p className="font-bold text-slate-900">
                           {payment.name}
                         </p>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="font-mono text-xs text-slate-500">
                           Rp{" "}
                           {formatRupiah(
                             payment.amount,
@@ -220,7 +220,7 @@ export default function PaymentOrderComparison({
                       </div>
 
                       {/* Controls */}
-                      <div className="flex gap-1">
+                      <div className="flex gap-1.5">
                         <button
                           type="button"
                           aria-label={`Pindahkan ${payment.name} ke atas`}
@@ -231,7 +231,7 @@ export default function PaymentOrderComparison({
                               -1,
                             )
                           }
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30"
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-600"
                         >
                           ↑
                         </button>
@@ -246,7 +246,7 @@ export default function PaymentOrderComparison({
                               1,
                             )
                           }
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30"
+                          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-600"
                         >
                           ↓
                         </button>
@@ -259,12 +259,12 @@ export default function PaymentOrderComparison({
           </div>
 
           {/* Actions */}
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
             <button
               type="button"
               onClick={handleApply}
               disabled={!hasChangedOrder}
-              className="flex-1 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+              className="flex-1 cursor-pointer rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-xs transition-all hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-none disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
             >
               Terapkan Urutan
             </button>
@@ -272,7 +272,7 @@ export default function PaymentOrderComparison({
             <button
               type="button"
               onClick={handleReset}
-              className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="cursor-pointer rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-xs transition-all hover:bg-slate-50 active:scale-[0.98]"
             >
               Kembalikan
             </button>
@@ -282,35 +282,35 @@ export default function PaymentOrderComparison({
           {alternativeResult && (
             <div className="mt-6">
               <div className="mb-4">
-                <p className="text-sm font-semibold text-blue-600">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
                   HASIL SIMULASI ALTERNATIF
                 </p>
 
-                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">
                   Dampak berdasarkan urutan baru
                 </h3>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {alternativeResult.map(
                   (item, index) => (
                     <div
                       key={`${item.paymentName}-${item.sequence}`}
-                      className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                      className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4.5 transition-all hover:bg-slate-50 hover:border-slate-300"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-blue-600 shadow-sm">
+                      <div className="flex items-start gap-3.5">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-xs">
                           {index + 1}
                         </div>
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="font-semibold text-slate-900">
+                              <p className="font-bold text-slate-900">
                                 {item.paymentName}
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="mt-1 font-mono text-xs font-semibold text-emerald-600">
                                 Rp{" "}
                                 {formatRupiah(
                                   item.paymentAmount,
@@ -318,24 +318,24 @@ export default function PaymentOrderComparison({
                               </p>
                             </div>
 
-                            <div className="text-right">
-                              <p className="text-xs text-slate-500">
+                            <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-right shadow-2xs">
+                              <p className="text-[10px] font-medium text-slate-400">
                                 TER Saat Ini
                               </p>
 
-                              <p className="font-bold text-slate-900">
+                              <p className="font-mono text-sm font-extrabold text-slate-900">
                                 {item.terRate * 100}%
                               </p>
                             </div>
                           </div>
 
-                          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                            <div className="rounded-xl bg-white p-3">
-                              <p className="text-xs text-slate-500">
+                          <div className="mt-3.5 grid gap-2.5 sm:grid-cols-2">
+                            <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+                              <p className="text-xs font-medium text-slate-400">
                                 Bruto Kumulatif
                               </p>
 
-                              <p className="mt-1 text-sm font-bold text-slate-900">
+                              <p className="mt-1 font-mono text-sm font-bold text-slate-900">
                                 Rp{" "}
                                 {formatRupiah(
                                   item.cumulativeGross,
@@ -343,12 +343,12 @@ export default function PaymentOrderComparison({
                               </p>
                             </div>
 
-                            <div className="rounded-xl bg-white p-3">
-                              <p className="text-xs text-slate-500">
+                            <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+                              <p className="text-xs font-medium text-slate-400">
                                 Dampak PPh
                               </p>
 
-                              <p className="mt-1 text-sm font-bold text-slate-900">
+                              <p className="mt-1 font-mono text-sm font-bold text-blue-600">
                                 +Rp{" "}
                                 {formatRupiah(
                                   item.paymentImpact,
@@ -364,16 +364,16 @@ export default function PaymentOrderComparison({
               </div>
 
               {/* Final comparison */}
-              <div className="mt-5 rounded-2xl border border-green-100 bg-green-50 p-4">
-                <p className="text-sm font-semibold text-green-900">
+              <div className="mt-5 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4.5">
+                <p className="text-sm font-bold text-emerald-950">
                   Total simulasi kumulatif tetap sama
                 </p>
 
-                <p className="mt-1 text-sm leading-6 text-green-800">
+                <p className="mt-1 text-sm leading-6 text-emerald-800">
                   Setelah seluruh pembayaran
                   diperhitungkan, total PPh simulasi
                   tetap{" "}
-                  <strong>
+                  <strong className="font-mono">
                     Rp{" "}
                     {formatRupiah(
                       alternativeResult[
@@ -386,7 +386,7 @@ export default function PaymentOrderComparison({
               </div>
 
               {/* Important note */}
-              <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+              <div className="mt-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4">
                 <p className="text-xs leading-5 text-amber-800">
                   <strong>Penting:</strong> perubahan
                   urutan hanya memengaruhi tampilan

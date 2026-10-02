@@ -50,14 +50,14 @@ export default function PaymentImpact({
   }
 
   return (
-    <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="mt-6 rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-7">
       {/* Header */}
       <div className="mb-6">
-        <p className="text-sm font-semibold text-blue-600">
+        <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
           KENAPA PPh SAYA NAIK?
         </p>
 
-        <h2 className="mt-1 text-xl font-bold text-slate-900">
+        <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
           Dampak berdasarkan urutan pembayaran
         </h2>
 
@@ -84,23 +84,23 @@ export default function PaymentImpact({
             >
               {/* Timeline line */}
               {!isLast && (
-                <div className="absolute left-[17px] top-9 h-[calc(100%-16px)] w-px bg-blue-100" />
+                <div className="absolute left-[17px] top-9 h-[calc(100%-16px)] w-px border-l-2 border-dashed border-blue-200" />
               )}
 
               {/* Number */}
-              <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-white text-sm font-bold text-blue-600 shadow-sm">
+              <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-xs">
                 {index + 1}
               </div>
 
               {/* Card */}
-              <div className="mb-4 min-w-0 flex-1 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-4 min-w-0 flex-1 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4.5 transition-all hover:bg-slate-50 hover:border-slate-300">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900">
+                    <h3 className="font-bold text-slate-900">
                       {item.paymentName}
                     </h3>
 
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 font-mono text-xs font-semibold text-emerald-600">
                       +Rp{" "}
                       {formatRupiah(
                         item.paymentAmount,
@@ -108,12 +108,12 @@ export default function PaymentImpact({
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white px-3 py-2 text-left shadow-sm sm:min-w-[100px] sm:text-right">
-                    <p className="text-[11px] text-slate-400">
+                  <div className="rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-left shadow-xs sm:min-w-[100px] sm:text-right">
+                    <p className="text-[11px] font-medium text-slate-400">
                       TER Saat Ini
                     </p>
 
-                    <p className="text-base font-bold text-slate-900">
+                    <p className="font-mono text-base font-extrabold text-slate-900">
                       {formatPercent(
                         item.terRate,
                       )}
@@ -123,12 +123,12 @@ export default function PaymentImpact({
 
                 {/* Detail */}
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl bg-white p-3">
-                    <p className="text-xs text-slate-400">
+                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-400">
                       Bruto Kumulatif
                     </p>
 
-                    <p className="mt-1 text-sm font-bold text-slate-800">
+                    <p className="mt-1 font-mono text-sm font-bold text-slate-800">
                       Rp{" "}
                       {formatRupiah(
                         item.cumulativeGross,
@@ -136,12 +136,12 @@ export default function PaymentImpact({
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white p-3">
-                    <p className="text-xs text-slate-400">
+                  <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+                    <p className="text-xs font-medium text-slate-400">
                       Dampak PPh pada Pembayaran Ini
                     </p>
 
-                    <p className="mt-1 text-sm font-bold text-slate-900">
+                    <p className="mt-1 font-mono text-sm font-bold text-blue-600">
                       +Rp{" "}
                       {formatRupiah(
                         item.paymentImpact,
@@ -160,7 +160,7 @@ export default function PaymentImpact({
                         : item.sequence,
                     )
                   }
-                  className="mt-4 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-blue-600 transition hover:border-blue-200 hover:bg-blue-50"
+                  className="mt-4 flex w-full cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-300 hover:bg-blue-50/50"
                 >
                   <span>
                     {isOpen
@@ -169,7 +169,7 @@ export default function PaymentImpact({
                   </span>
 
                   <span
-                    className={`transition-transform ${
+                    className={`transition-transform duration-200 ${
                       isOpen
                         ? "rotate-180"
                         : ""
@@ -181,7 +181,7 @@ export default function PaymentImpact({
 
                 {/* Explanation */}
                 {isOpen && (
-                  <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                  <div className="mt-3 rounded-xl border border-blue-200/80 bg-blue-50/70 p-4">
                     <p className="text-sm leading-6 text-blue-950">
                       {getExplanation(
                         item,
@@ -189,7 +189,7 @@ export default function PaymentImpact({
                       )}
                     </p>
 
-                    <div className="mt-3 border-t border-blue-100 pt-3">
+                    <div className="mt-3 border-t border-blue-200/60 pt-3">
                       <p className="text-xs leading-5 text-blue-800">
                         <strong>Penting:</strong>{" "}
                         dampak PPh di atas merupakan
@@ -208,7 +208,7 @@ export default function PaymentImpact({
       </div>
 
       {/* Disclaimer */}
-      <div className="mt-2 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+      <div className="mt-2 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4">
         <p className="text-xs leading-5 text-amber-800">
           <strong>Catatan edukasi:</strong> Dampak PPh
           per pembayaran digunakan untuk membantu

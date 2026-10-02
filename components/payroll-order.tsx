@@ -101,13 +101,13 @@ export default function PayrollOrder({
   };
 
   return (
-    <section className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 sm:p-6">
+    <section className="rounded-3xl border border-amber-200/90 bg-gradient-to-b from-amber-50/40 via-white to-amber-50/20 p-5 shadow-xs sm:p-6">
       <div className="mb-5">
-        <p className="text-sm font-semibold tracking-wide text-amber-700">
+        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
           URUTAN PROSES PAYROLL
         </p>
 
-        <h3 className="mt-1 text-xl font-bold text-slate-900">
+        <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">
           Urutan Gross-Up
         </h3>
 
@@ -121,7 +121,7 @@ export default function PayrollOrder({
         </p>
       </div>
 
-      <div className="rounded-2xl border border-amber-100 bg-white p-4">
+      <div className="rounded-2xl border border-amber-200/80 bg-white p-4 shadow-xs">
         <p className="text-xs leading-5 text-amber-800">
           <strong>Catatan:</strong> PPh 21
           resmi tetap dihitung dari total
@@ -132,7 +132,7 @@ export default function PayrollOrder({
         </p>
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className="mt-5 space-y-2.5">
         {activeItems.map(
           (item, index) => {
             const isFirst =
@@ -145,18 +145,18 @@ export default function PayrollOrder({
             return (
               <div
                 key={item.key}
-                className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"
+                className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all hover:border-amber-300/80 hover:shadow-sm"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-sm font-bold text-amber-700">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-sm font-bold text-white shadow-xs">
                   {index + 1}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-bold text-slate-900">
                     {item.label}
                   </p>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="font-mono text-xs text-slate-500">
                     Rp{" "}
                     {formatRupiah(
                       item.amount,
@@ -164,7 +164,7 @@ export default function PayrollOrder({
                   </p>
                 </div>
 
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   <button
                     type="button"
                     aria-label={`Pindahkan ${item.label} ke atas`}
@@ -175,7 +175,7 @@ export default function PayrollOrder({
                         -1,
                       )
                     }
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-600"
                   >
                     ↑
                   </button>
@@ -190,7 +190,7 @@ export default function PayrollOrder({
                         1,
                       )
                     }
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-600"
                   >
                     ↓
                   </button>
@@ -204,7 +204,7 @@ export default function PayrollOrder({
       <button
         type="button"
         onClick={handleReset}
-        className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+        className="mt-4 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
       >
         Kembalikan ke Urutan Default
       </button>

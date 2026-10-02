@@ -178,7 +178,7 @@ export default function IncomeForm({
     );
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs transition-shadow hover:shadow-sm sm:p-6">
 
       {/* =====================================================
           HEADER
@@ -187,18 +187,18 @@ export default function IncomeForm({
       <div className="mb-5">
         <div className="flex items-center gap-3">
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-xs">
             02
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
               {isFinalMonth
                 ? "Perhitungan akhir"
                 : "Masa pajak"}
             </p>
 
-            <h2 className="mt-0.5 text-xl font-bold text-slate-900">
+            <h2 className="mt-0.5 text-xl font-bold tracking-tight text-slate-900">
               {isFinalMonth
                 ? "Penghasilan Periode"
                 : "Penghasilan Bulan Ini"}
@@ -221,34 +221,40 @@ export default function IncomeForm({
 
       {!isFinalMonth && (
         <>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3.5 flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-700">
               Komponen Penghasilan
             </p>
 
-            <span className="text-xs text-slate-400">
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
               Isi yang Anda terima
             </span>
           </div>
 
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
 
             {fields.map((field) => {
               const treatment =
                 payrollTreatments[field.key];
 
+              const hasValue = values[field.key] > 0;
+
               return (
                 <div
                   key={field.key}
-                  className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                  className={`rounded-2xl border p-4 transition-all ${
+                    hasValue
+                      ? "border-blue-200/80 bg-blue-50/20 shadow-xs"
+                      : "border-slate-200/80 bg-slate-50/40 hover:bg-slate-50/80 hover:border-slate-300/80"
+                  }`}
                 >
 
                   {/* -----------------------------------------
                       Income Header
                   ------------------------------------------ */}
 
-                  <div className="mb-2 flex items-start justify-between gap-4">
+                  <div className="mb-2.5 flex items-start justify-between gap-4">
 
                     <div>
                       <label
@@ -263,7 +269,7 @@ export default function IncomeForm({
                       </p>
                     </div>
 
-                    <span className="text-xs font-medium text-slate-400">
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
                       Rp
                     </span>
 
@@ -290,7 +296,7 @@ export default function IncomeForm({
                         ),
                       )
                     }
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right text-base font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right font-mono text-base font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-300 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 sm:text-lg"
                   />
 
 
@@ -299,7 +305,7 @@ export default function IncomeForm({
                   ------------------------------------------ */}
 
                   {values[field.key] > 0 && (
-                    <div className="mt-3">
+                    <div className="mt-3.5 pt-3 border-t border-slate-200/60">
 
                       <p className="mb-2 text-xs font-semibold text-slate-600">
                         Perlakuan Payroll
@@ -315,10 +321,10 @@ export default function IncomeForm({
                               "GROSS",
                             )
                           }
-                          className={`rounded-xl border px-3 py-2.5 text-xs font-semibold transition ${
+                          className={`cursor-pointer rounded-xl border px-3 py-2.5 text-xs font-bold transition-all active:scale-[0.98] ${
                             treatment === "GROSS"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                              ? "border-blue-600 bg-blue-600 text-white shadow-xs"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                         >
                           GROSS
@@ -332,10 +338,10 @@ export default function IncomeForm({
                               "GROSS_UP",
                             )
                           }
-                          className={`rounded-xl border px-3 py-2.5 text-xs font-semibold transition ${
+                          className={`cursor-pointer rounded-xl border px-3 py-2.5 text-xs font-bold transition-all active:scale-[0.98] ${
                             treatment === "GROSS_UP"
-                              ? "border-amber-500 bg-amber-50 text-amber-700"
-                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                              ? "border-amber-500 bg-amber-500 text-white shadow-xs"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                         >
                           GROSS-UP
@@ -353,7 +359,7 @@ export default function IncomeForm({
 
                   {values[field.key] > 0 &&
                     treatment === "GROSS_UP" && (
-                      <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3">
+                      <div className="mt-3.5 rounded-xl border border-amber-200/80 bg-amber-50/70 p-3.5">
 
                         <p className="text-xs font-semibold text-amber-900">
                           Mekanisme Gross-Up
@@ -366,11 +372,11 @@ export default function IncomeForm({
                           oleh simulator.
                         </p>
 
-                        <div className="mt-3 rounded-lg bg-white/70 p-3">
+                        <div className="mt-2.5 rounded-lg border border-amber-200/60 bg-white/80 p-3 shadow-xs">
 
                           <div className="flex items-start gap-2">
 
-                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700">
+                            <div className="mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700">
                               i
                             </div>
 
@@ -403,13 +409,16 @@ export default function IncomeForm({
               GROSS TOTAL
           ================================================== */}
 
-          <div className="mt-5 rounded-2xl bg-slate-900 p-5 text-white">
+          <div className="mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-5 text-white shadow-sm sm:p-6 border border-slate-800">
 
-            <p className="text-sm text-slate-300">
-              Total Penghasilan Bruto Bulan Ini
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Total Penghasilan Bruto Bulan Ini
+              </p>
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            </div>
 
-            <p className="mt-1 text-2xl font-bold tracking-tight">
+            <p className="mt-2 font-mono text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               Rp {formatRupiah(total)}
             </p>
 
@@ -420,9 +429,9 @@ export default function IncomeForm({
               EDUCATIONAL NOTE
           ================================================== */}
 
-          <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+          <div className="mt-4 rounded-2xl border border-blue-200/70 bg-blue-50/60 p-4.5">
 
-            <p className="text-xs leading-5 text-blue-800">
+            <p className="text-xs leading-5 text-blue-900">
               <strong>GROSS</strong> berarti komponen
               penghasilan ditanggung pajaknya oleh pegawai.
               <br />
@@ -431,7 +440,7 @@ export default function IncomeForm({
               tunjangan pajak dari pemberi kerja.
             </p>
 
-            <p className="mt-2 text-[11px] leading-5 text-blue-700">
+            <p className="mt-2 text-[11px] leading-5 text-blue-800">
               Pada mode GROSS-UP, cukup masukkan
               penghasilan sebelum tunjangan PPh.
               Tunjangan pajak dihitung otomatis oleh
@@ -454,15 +463,15 @@ export default function IncomeForm({
       ====================================================== */}
 
       {isFinalMonth && (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+        <div className="rounded-2xl border border-blue-200/80 bg-blue-50/60 p-5">
 
           <div className="mb-4">
 
-            <span className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-blue-700 shadow-sm">
+            <span className="inline-flex rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-semibold text-blue-700 shadow-xs">
               Input utama
             </span>
 
-            <p className="mt-2 text-sm font-semibold text-blue-900">
+            <p className="mt-2.5 text-base font-bold text-blue-950">
               Total Penghasilan Bruto Selama Periode
             </p>
 
@@ -483,7 +492,7 @@ export default function IncomeForm({
               Total Penghasilan Bruto Periode
             </label>
 
-            <span className="text-xs font-medium text-slate-400">
+            <span className="rounded-md bg-blue-100/70 px-2 py-0.5 text-xs font-semibold text-blue-700">
               Rp
             </span>
 
@@ -505,7 +514,7 @@ export default function IncomeForm({
                 ),
               )
             }
-            className="w-full rounded-xl border border-blue-100 bg-white px-4 py-3 text-right text-lg font-bold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3.5 text-right font-mono text-xl font-bold text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
           />
 
 
@@ -527,11 +536,11 @@ export default function IncomeForm({
 
           <div className="mb-4">
 
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
               Data tambahan
             </p>
 
-            <h3 className="mt-1 text-lg font-bold text-slate-900">
+            <h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">
               Pengurang & Potongan
             </h3>
 
@@ -547,7 +556,7 @@ export default function IncomeForm({
             {deductionFields.map((field) => (
               <div
                 key={field.key}
-                className="rounded-2xl border border-blue-100 bg-blue-50 p-4"
+                className="rounded-2xl border border-blue-100/80 bg-blue-50/40 p-4 transition-all hover:bg-blue-50/70"
               >
 
                 <div className="mb-2 flex items-start justify-between gap-4">
@@ -567,7 +576,7 @@ export default function IncomeForm({
 
                   </div>
 
-                  <span className="text-xs font-medium text-slate-400">
+                  <span className="rounded-md bg-blue-100/60 px-2 py-0.5 text-xs font-semibold text-blue-700">
                     Rp
                   </span>
 
@@ -590,7 +599,7 @@ export default function IncomeForm({
                       ),
                     )
                   }
-                  className="w-full rounded-xl border border-blue-100 bg-white px-4 py-3 text-right text-base font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-blue-200/80 bg-white px-4 py-3 text-right font-mono text-base font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 />
 
               </div>
@@ -599,7 +608,7 @@ export default function IncomeForm({
           </div>
 
 
-          <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+          <div className="mt-4 rounded-2xl border border-amber-200/70 bg-amber-50/60 p-4">
 
             <p className="text-xs leading-5 text-amber-800">
               <strong>Catatan:</strong> Biaya jabatan
