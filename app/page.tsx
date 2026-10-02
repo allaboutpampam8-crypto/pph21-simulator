@@ -16,6 +16,8 @@ import TaxExplanation from "@/components/tax-explanation";
 import TaxCalculationDetail from "@/components/tax-calculation-detail";
 
 import { simulateTax } from "@/lib/tax-engine";
+import { getTaxConfig } from "@/config/tax";
+import { calculateGrossUpPayments } from "@/lib/tax-engine/gross-up-payment";
 
 import type {
   GrossUpPayment,
@@ -286,12 +288,6 @@ export default function Home() {
       return;
     }
 
-    // -----------------------------------------------------
-    // SAVE INCOME ITEMS
-    // -----------------------------------------------------
-
-    setSimulationIncomeItems(incomeItems);
-
     // =====================================================
     // PAYROLL PAYMENTS
     // =====================================================
@@ -338,6 +334,49 @@ export default function Home() {
 
     const hasPayrollAllocation = !isFinalMonth && payrollPayments.length > 0;
 
+    // -----------------------------------------------------
+    // EFFECTIVE INCOME ITEMS (GROSS-UP SYNCHRONIZATION)
+    // -----------------------------------------------------
+
+    let effectiveIncomeItems = incomeItems;
+    const hasGrossUpPayment = payrollPayments.some(
+      (payment) => payment.treatment === "GROSS_UP",
+    );
+
+    if (hasPayrollAllocation && hasGrossUpPayment) {
+      const config = getTaxConfig(TAX_YEAR);
+      const terCategory = config.TER_CATEGORY[status];
+      const grossUpResults = calculateGrossUpPayments({
+        taxYear: TAX_YEAR,
+        category: terCategory,
+        payments: payrollPayments,
+      });
+
+      const allowanceMap = new Map(
+        grossUpResults.map((r) => [r.id, r.actualTaxAllowance]),
+      );
+
+      effectiveIncomeItems = incomeDefinitions
+        .map((definition) => {
+          const baseAmount = income[definition.key];
+          const allowance = allowanceMap.get(definition.key) ?? 0;
+
+          return {
+            name: definition.name,
+            amount: baseAmount + allowance,
+            type: definition.type,
+            sequence: definition.sequence,
+          };
+        })
+        .filter((item) => item.amount > 0);
+    }
+
+    // -----------------------------------------------------
+    // SAVE INCOME ITEMS
+    // -----------------------------------------------------
+
+    setSimulationIncomeItems(effectiveIncomeItems);
+
     // =====================================================
     // SIMULATE TAX
     // =====================================================
@@ -358,7 +397,7 @@ export default function Home() {
           taxSubjectStartedMidYear,
         },
 
-        incomeItems,
+        incomeItems: effectiveIncomeItems,
 
         finalGrossIncome: isFinalMonth ? finalGrossIncome : undefined,
 
