@@ -419,6 +419,14 @@ export default function Home() {
     );
 
     setResult(simulation);
+
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        document
+          .getElementById("simulation-result")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
   };
 
   // =====================================================
@@ -469,8 +477,9 @@ export default function Home() {
           HERO
       ====================================================== */}
 
-      <section className="border-b border-slate-200/60 bg-gradient-to-b from-blue-50/50 via-slate-50/40 to-slate-50">
-        <div className="mx-auto max-w-5xl px-5 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14">
+      <section className="relative overflow-hidden border-b border-slate-200/60 bg-gradient-to-b from-blue-50/50 via-slate-50/40 to-slate-50">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.12),rgba(255,255,255,0))]" />
+        <div className="relative mx-auto max-w-5xl px-5 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14">
           <div className="max-w-3xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-blue-700 shadow-xs">
               <span className="h-2 w-2 rounded-full bg-blue-600"></span>
@@ -556,9 +565,10 @@ export default function Home() {
           <button
             type="button"
             onClick={handleSimulate}
-            className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-6 py-4.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/35 active:scale-[0.99]"
+            className="group relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-6 py-4.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/35 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.99]"
           >
-            Simulasikan PPh 21 →
+            <span>Simulasikan PPh 21</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </button>
 
           {/* =================================================
@@ -588,7 +598,7 @@ export default function Home() {
         ====================================================== */}
 
         {result && (
-          <section className="mt-8">
+          <section id="simulation-result" className="mt-8 scroll-mt-20">
             {/* =================================================
                 MONTHLY RESULT
             ================================================== */}

@@ -17,13 +17,19 @@ export const metadata: Metadata = {
   description: "Simulasikan bagaimana gaji, lembur, THR, dan bonus memengaruhi potongan PPh 21 Anda.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
+        {children}
+      </body>
     </html>
   );
 }
