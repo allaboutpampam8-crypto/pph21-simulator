@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatPercent } from "@/lib/formatters";
 import type { PaymentImpactResult } from "@/lib/tax-engine/types";
 
 interface PaymentImpactProps {
@@ -12,10 +13,6 @@ function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatPercent(value: number) {
-  return `${value * 100}%`;
 }
 
 function getExplanation(

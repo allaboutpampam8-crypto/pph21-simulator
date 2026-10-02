@@ -27,6 +27,7 @@ import type {
 } from "@/lib/tax-engine/types";
 
 import PayrollOrder, { type PayrollOrderKey } from "@/components/payroll-order";
+import { formatPercent } from "@/lib/formatters";
 
 // =====================================================
 // INITIAL VALUES
@@ -636,7 +637,7 @@ export default function Home() {
                       <p className="text-xs font-medium text-slate-500">TER Saat Ini</p>
 
                       <p className="mt-1 font-mono text-base font-bold text-slate-900 sm:text-lg">
-                        {result.monthly.terRate * 100}%
+                        {formatPercent(result.monthly.terRate)}
                       </p>
                     </div>
                   </div>
@@ -738,11 +739,11 @@ export default function Home() {
                                 <>
                                   <PayrollDetail
                                     label="TER saat tunjangan dibentuk"
-                                    textValue={`${payment.terRate * 100}%`}
+                                    textValue={formatPercent(payment.terRate)}
                                   />
                                   <PayrollDetail
                                     label="Rumus tunjangan PPh"
-                                    textValue={`Rp ${formatRupiah(payment.grossUpBase)} × ${payment.terRate * 100}% / (1 − ${payment.terRate * 100}%)`}
+                                    textValue={`Rp ${formatRupiah(payment.grossUpBase)} × ${formatPercent(payment.terRate)} / (1 − ${formatPercent(payment.terRate)})`}
                                   />
                                   <PayrollDetail
                                     label="Tunjangan PPh otomatis"
@@ -769,10 +770,11 @@ export default function Home() {
                                     label="TER sebelum → sesudah"
                                     textValue={`${
                                       index === 0
-                                        ? 0
-                                        : payrollPayments[index - 1].terRate *
-                                          100
-                                    }% → ${payment.terRate * 100}%`}
+                                        ? "0%"
+                                        : formatPercent(
+                                            payrollPayments[index - 1].terRate,
+                                          )
+                                    } → ${formatPercent(payment.terRate)}`}
                                   />
                                   <PayrollDetail
                                     label="PPh sebelum → sesudah pembayaran"
@@ -819,11 +821,13 @@ export default function Home() {
                         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                           <PayrollDetail
                             label="TER sebelum Re-Gross-Up"
-                            textValue={`${finalPayrollPayment.terRate * 100}%`}
+                            textValue={formatPercent(finalPayrollPayment.terRate)}
                           />
                           <PayrollDetail
                             label="TER setelah Re-Gross-Up"
-                            textValue={`${finalPayrollPayment.finalTerRate * 100}%`}
+                            textValue={formatPercent(
+                              finalPayrollPayment.finalTerRate,
+                            )}
                           />
                           <PayrollDetail
                             label="Total tunjangan PPh awal"
@@ -849,7 +853,9 @@ export default function Home() {
                             label="Rumus PPh resmi setelah adjustment"
                             textValue={`Rp ${formatRupiah(
                               result.payrollAllocation.brutoOri,
-                            )} × ${finalPayrollPayment.finalTerRate * 100}%`}
+                            )} × ${formatPercent(
+                              finalPayrollPayment.finalTerRate,
+                            )}`}
                           />
                         </div>
                       </div>

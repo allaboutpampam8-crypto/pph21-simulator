@@ -13,9 +13,7 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
-function formatPercent(value: number) {
-  return `${value * 100}%`;
-}
+import { formatPercent } from "@/lib/formatters";
 
 export default function TaxCalculationDetail({
   result,

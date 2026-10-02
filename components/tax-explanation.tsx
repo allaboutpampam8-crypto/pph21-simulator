@@ -17,9 +17,7 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
-function formatPercent(rate: number) {
-  return `${rate * 100}%`;
-}
+import { formatPercent } from "@/lib/formatters";
 
 function getPaymentLabel(item: IncomeItem) {
   switch (item.type) {

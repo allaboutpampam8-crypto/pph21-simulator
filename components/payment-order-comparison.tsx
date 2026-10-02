@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { calculatePaymentImpactForOrder } from "@/lib/tax-engine/payment-impact";
 
+import { formatPercent } from "@/lib/formatters";
 import type {
   IncomeItem,
   PaymentImpactResult,
@@ -324,7 +325,7 @@ export default function PaymentOrderComparison({
                               </p>
 
                               <p className="font-mono text-sm font-extrabold text-slate-900">
-                                {item.terRate * 100}%
+                                {formatPercent(item.terRate)}
                               </p>
                             </div>
                           </div>
